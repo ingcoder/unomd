@@ -99,3 +99,17 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## Contributing
 
 We welcome contributions! Please feel free to submit a Pull Request.
+
+## Citation
+
+If you use EasyMD in your research, please cite it as:
+
+```bibtex
+@software{easymd2024,
+  author       = {Ingrid Barbosa-Farias, SimAtomic},
+  title        = {EasyMD: A Python Package for Simplified Molecular Dynamics Simulations},
+  year         = {2025},
+  publisher    = {GitHub},
+  url          = {https://github.com/ingcoder/easy-md}
+}
+```
