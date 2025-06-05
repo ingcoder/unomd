@@ -1,0 +1,22 @@
+name: easymd
+channels:
+  - conda-forge
+  - defaults
+
+dependencies:
+  # Core MD packages
+  - python=3.9
+  - openmm=8.0.0
+  - pdbfixer
+  - mdanalysis
+  - openff-toolkit
+  
+  # Analysis and visualization
+  - pandas
+  - matplotlib
+  
+  # Python packages to be installed with pip
+  - pip
+  - pip:
+    - notebook
+    - rdkit

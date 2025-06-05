@@ -1,0 +1,78 @@
+EPE
+  ModelServer 0.9.12
+
+ 15 15  0  0  0  0  0  0  0  0  0
+  -29.7830   16.9570   13.1410 N   0  0  0  0  0  0  0  0  0  0  0  0
+  -29.9710   15.4910   13.1910 C   0  0  0  0  0  0  0  0  0  0  0  0
+  -28.9220   14.8610   14.0940 C   0  0  0  0  0  0  0  0  0  0  0  0
+  -27.5810   15.2340   13.6930 N   0  0  0  0  0  0  0  0  0  0  0  0
+  -27.3780   16.6610   13.5030 C   0  0  0  0  0  0  0  0  0  0  0  0
+  -28.4500   17.2510   12.5850 C   0  0  0  0  0  0  0  0  0  0  0  0
+  -26.5210   14.5240   14.4230 C   0  0  0  0  0  0  0  0  0  0  0  0
+  -26.6300   14.5300   15.9510 C   0  0  0  0  0  0  0  0  0  0  0  0
+  -26.6080   15.8710   16.4190 O   0  0  0  0  0  0  0  0  0  0  0  0
+  -30.8290   17.5120   12.2540 C   0  0  0  0  0  0  0  0  0  0  0  0
+  -30.7540   19.0320   12.3550 C   0  0  0  0  0  0  0  0  0  0  0  0
+  -32.3280   19.7980   11.8950 S   0  0  0  0  0  0  0  0  0  0  0  0
+  -32.2980   21.2130   12.2660 O   0  0  0  0  0  0  0  0  0  0  0  0
+  -32.4970   19.6480   10.4440 O   0  0  0  0  0  0  0  0  0  0  0  0
+  -33.3810   19.0720   12.6100 O   0  0  0  0  0  0  0  0  0  0  0  0
+  1  2  1  0  0  0  0
+  1  6  1  0  0  0  0
+  1 10  1  0  0  0  0
+  2  3  1  0  0  0  0
+  3  4  1  0  0  0  0
+  4  5  1  0  0  0  0
+  4  7  1  0  0  0  0
+  5  6  1  0  0  0  0
+  7  8  1  0  0  0  0
+  8  9  1  0  0  0  0
+ 10 11  1  0  0  0  0
+ 11 12  1  0  0  0  0
+ 12 13  2  0  0  0  0
+ 12 14  2  0  0  0  0
+ 12 15  1  0  0  0  0
+M  END
+> <model_server_result.job_id>
+nGCHuIlqOPrIxoP4lpNJjA
+
+> <model_server_result.datetime_utc>
+2025-06-03 01:48:06
+
+> <model_server_result.server_version>
+0.9.12
+
+> <model_server_result.query_name>
+ligand
+
+> <model_server_result.source_id>
+pdb-bcif
+
+> <model_server_result.entry_id>
+4w52
+
+> <model_server_params.name>
+atom_site
+
+> <model_server_params.value>
+{"label_asym_id":"C","auth_seq_id":201}
+
+> <model_server_stats.io_time_ms>
+31
+
+> <model_server_stats.parse_time_ms>
+8
+
+> <model_server_stats.create_model_time_ms>
+2
+
+> <model_server_stats.query_time_ms>
+254
+
+> <model_server_stats.encode_time_ms>
+0
+
+> <model_server_stats.element_count>
+15
+
+$$$$
