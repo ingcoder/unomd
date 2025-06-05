@@ -105,7 +105,7 @@ We welcome contributions! Please feel free to submit a Pull Request.
 If you use EasyMD in your research, please cite it as:
 
 ```bibtex
-@software{easymd2024,
+@software{easymd2025,
   author       = {Ingrid Barbosa-Farias, SimAtomic},
   title        = {EasyMD: A Python Package for Simplified Molecular Dynamics Simulations},
   year         = {2025},
