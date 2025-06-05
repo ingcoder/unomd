@@ -2,7 +2,7 @@
 
 EasyMD is a Python package that simplifies molecular dynamics simulations, making them accessible to both beginners and experts. It provides an automated, easy-to-use interface for running protein-ligand simulations using OpenMM as the backend.
 
-![Demo Gif](docs/assets/demo.gif)
+![Demo Gif](assets/demo.gif)
 
 ## Who is it for?
 
