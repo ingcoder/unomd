@@ -69,6 +69,112 @@ quickrun(
 )
 ```
 
+## Step-by-Step Approach
+```python
+from easy_md.utils.config import create_config
+from easy_md.main import run_solvation, run_forcefield_parameterization, run_energy_minimization, run_simulation
+
+config = create_config(
+    protein_file="path/to/protein.pdb",
+    ligand_file="path/to/ligand.sdf",
+    
+    # MD simulation settings. See "Simulation Paramters" section below for all options
+    md_steps=1000,
+    md_save_interval=10,
+    
+    # Platform settings
+    platform_name="CPU",          # or GPU
+    platform_precision="mixed",   # or "single" or "double"
+)
+run_solvation.add_water(config=config)
+run_forcefield_parameterization.main(config)
+run_energy_minimization.main(config)
+run_simulation.main(config, starting_state_path="path/to/state.xml")
+# By default `run_simulation.main(config)` loads the energy-minimized state
+# saved in `emin.xml`.  To resume a previous run instead, supply the path
+# to its state file .xml starting_state_path="path/to/state.xml" or checkpoint file: starting_state_path="path/to/state.xml":
+```
+
+
+## Simulation Parameters
+```yaml
+# Energy Minimization Parameters
+emin_heating_interval: 1           # Interval for heating during minimization
+emin_heating_step: 300             # Heating step size
+emin_steps: 10                     # Number of minimization steps
+emin_target_temp: 300              # Target temperature for minimization (K)
+emin_tolerance: 5                  # Energy tolerance (kJ/mol/nm)
+
+# Force Field Parameters
+ff_protein: "amber14-all.xml"                               # Protein force field
+ff_protein_openff: "ff14sb_off_impropers_0.0.3.offxml"      # OpenFF protein parameters
+ff_small_molecule_openff: "openff-2.0.0.offxml"             # Small molecule force field
+ff_water: "amber14/tip3pfb.xml"                             # Water model
+
+# Integrator Settings
+integrator_friction: 1.0          # Langevin integrator friction coefficient (1/ps)
+integrator_temperature: 300.0     # Simulation temperature (K)
+integrator_timestep: 0.002        # Integration timestep (ps)
+
+# Molecular Dynamics Settings
+md_anisotropic: false             # Use anisotropic barostat
+md_barostat_freq: 25              # Barostat update frequency
+md_harmonic_restraint: true       # Apply harmonic restraints
+md_load_state: true               # Load from previous state if available
+md_npt: false                     # Run in NPT ensemble
+md_pressure: 1.0                  # System pressure (atm)
+md_restrained_residues: []        # List of residues to restrain
+md_save_interval: 10              # Trajectory save interval
+md_steps: 1000                    # Number of MD steps
+
+# Monitoring Parameters
+monitor_energy_threshold: 100.0    # Energy monitoring threshold
+monitor_temp_threshold: 2.0        # Temperature monitoring threshold
+monitor_window: 10                 # Monitoring window size
+
+# Solvation Parameters
+solv_box_buffer: 2.5              # Solvent box padding (Å)
+solv_ionic_strength: 0.15         # Ionic strength (M)
+solv_model: "tip3p"               # Water model
+solv_negative_ion: "Cl-"          # Negative ion type
+solv_pH: 7.0                      # System pH
+solv_positive_ion: "Na+"          # Positive ion type
+
+# Analysis Settings
+rmsd_ligand_selection: "resname UNK"   # RMSD selection for ligand
+rmsd_selection: "protein and name CA"  # RMSD selection for protein
+rmsf_selection: "protein and name CA"  # RMSF selection
+
+# Platform Configuration
+platform_name: "GPU"               # Computation platform (GPU/CPU)
+platform_precision: "mixed"        # Precision model
+
+# Paths
+path_protein: path/to/protein.pdb                # Required by user
+path_ligand: path/to/ligand.sdf                  # Required if you want to simulate protein-ligand interaction
+
+# Paths set automatically, unless provided by user
+
+path_base: path/to/project_dir # # Defaults to the parent directory containing the protein structure files
+
+path_amber_topology: path_base/output/amber_top.prmtop
+path_emin_state: path_base/output/emin.xml
+path_emin_structure: path_base/output/emin.pdb
+path_md_checkpoint: path_base/output/md_checkpoint_id.chk
+path_md_image: path_base/output/md_image_id.dcd                #! Final processed trajectory file with molecules re-centered in water box.
+path_md_log: path_base/output/md_id.log
+path_md_state: path_base/output/md_state_id.xml
+path_md_trajectory: path_base/output/md_trajetory_id.dcd
+path_openff_interchange: path_base/output/openff_interchange.pdb
+path_openff_topology: path_base/output/openff_topology.json
+path_openmm_system: path_base/output/openmm_system.xml
+path_openmm_topology: path_base/output/openmm_topology.pkl
+path_protein_solvated: path_base/output/protein_solvated.pdb
+path_rmsd_ligand_output: path_base/output/rmsd_ligand.pkl
+path_rmsd_output: path_base/output/rmsd.pkl
+path_rmsf_output: path_base/output/rmsf.log
+```
+
 ## Requirements
 
 Core dependencies are automatically managed through pyproject.toml:
