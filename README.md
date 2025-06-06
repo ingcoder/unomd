@@ -1,3 +1,10 @@
+<!-- or percentage of the text‐column width -->
+<p align="center">
+  <img src="assets/feynman_quote_3.png"
+       alt="Feynman quote"
+       width=70%>
+</p>
+
 # EasyMD
 
 EasyMD is a Python package that simplifies molecular dynamics simulations, making them accessible to both beginners and experts. It provides an automated, easy-to-use interface for running protein-ligand simulations using OpenMM as the backend.
