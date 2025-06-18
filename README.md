@@ -59,8 +59,8 @@ bash Mambaforge-$(uname)-$(uname -m).sh
 git clone https://github.com/ingcoder/easy-md.git
 cd easy-md
 mamba env create -f environment.yaml
-mamba activate md_env
-pip install -e 
+mamba activate easymd
+pip install -e .
 ```
 
 ## Quick Start
