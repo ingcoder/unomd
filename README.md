@@ -90,7 +90,7 @@ config = create_config(
     md_save_interval=10,
     
     # Platform settings
-    platform_name="CPU",          # or GPU
+    platform_name="CPU",          # or CUDA
     platform_precision="mixed",   # or "single" or "double"
 )
 run_solvation.add_water(config=config)
