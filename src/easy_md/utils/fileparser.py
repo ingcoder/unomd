@@ -1,29 +1,34 @@
-import MDAnalysis as mda
+
+# Standard library imports
+import time
+from functools import wraps
 import subprocess
+
+
+# Third-party imports
+import MDAnalysis as mda
 from rdkit import Chem
 from openmm.app import *
 from openmm import *
 from openff.toolkit import ForceField, Topology
-import time
-from functools import wraps
-
-import pickle
 import openmm 
 import parmed
-
+import pickle
 from openmm import XmlSerializer
 from openmm.app import PDBFile, Simulation
 from openff.toolkit import Topology
 from openmm.unit import kelvin, picosecond, picoseconds
-
 from openmm import(
     XmlSerializer,
     
 )
-import pickle
 from openff.toolkit import ForceField
-# from openff.interchange.interop import parmed
-    
+
+# Custom imports & logging
+from easy_md.utils import info_logger
+import logging
+
+logger = logging.getLogger(__name__)
 
 def time_tracker(func):
     @wraps(func)
@@ -32,7 +37,7 @@ def time_tracker(func):
         result = func(*args, **kwargs)
         end_time = time.time()
         execution_time = end_time - start_time
-        print(f"Function '{func.__name__}' took {execution_time:.4f} seconds to execute")
+        logger.info(f"⏰ Function '{func.__name__}' took {execution_time:.4f} seconds to execute")
         return result
     return wrapper
 
@@ -44,25 +49,25 @@ def pqr_to_pdb_obabel(input_file_pqr, output_file_pdb):
     command = ["obabel", input_file_pqr, "-O", output_file_pdb, "-xn"]
     try:
         subprocess.run(command, check=True)
-        print(f"Conversion successful! Output saved as {output_file_pdb}")
+        logger.info(f"Conversion successful! Output saved as {output_file_pdb}")
     except subprocess.CalledProcessError as e:
-        print(f"Error during conversion: {e}")
+        logger.error(f"Error during conversion: {e}")
 
 def pdbqt_to_sdf(input_file, output_file, config):
     command = ["obabel", input_file, "-O", output_file, "-p", config['solv_pH'], "-h", "-m"]
     try:
         subprocess.run(command, check=True)
-        print(f"Conversion successful! Output saved as {output_file}")
+        logger.info(f"Conversion successful! Output saved as {output_file}")
     except subprocess.CalledProcessError as e:
-        print(f"Error during conversion: {e}")
+        logger.error(f"Error during conversion: {e}")
 
 def pdbqt_to_pdb(input_file, output_file):
     command = ["obabel", input_file, "-O", output_file, "-m"]
     try:
         subprocess.run(command, check=True)
-        print(f"Conversion successful! Output saved as {output_file}")
+        logger.info(f"Conversion successful! Output saved as {output_file}")
     except subprocess.CalledProcessError as e:
-        print(f"Error during conversion: {e}")
+        logger.error(f"Error during conversion: {e}")
   
 def prepare_ligand_for_md(input_file, output_file):
     """
