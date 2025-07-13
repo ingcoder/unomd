@@ -51,7 +51,7 @@ DEFAULT_CONFIG = {
     "md_pressure": 1.0,
     "md_anisotropic": False,
     "md_barostat_freq": 25,
-    "md_harmonic_restraint": True,
+    "md_harmonic_restraint": False,
     "md_load_state": True,
     "md_restrained_residues": [],
     "md_npt": False,

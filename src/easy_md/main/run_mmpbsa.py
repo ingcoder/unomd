@@ -20,75 +20,91 @@ for MM/PBSA calculations, ensuring proper handling of constrained bonds and
 force field parameters.
 """
 
-from easy_md.utils.fileparser import load_openff_topology_from_json
-import parmed
+# Standard library imports
+import logging
 import os
 from pathlib import Path
-from typing import Union
-import logging
+from typing import List, Set, Union
+import subprocess
+
+# Third-party imports
+import parmed
 from openff.toolkit import ForceField
 
-#------------------------------------------------------------------------------
-# Helper Functions
-#------------------------------------------------------------------------------
-# Set up logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
+# Custom imports
+from easy_md.utils.fileparser import load_openff_topology_from_json
+from easy_md.utils import info_logger
+import logging
+
 logger = logging.getLogger(__name__)
+
+# ------------------------------------------------------------------------------
+# Constants
+# ------------------------------------------------------------------------------
+
+FF_SMALL_MOLECULE = ("openff-2.0.0.offxml",)
+FF_PROTEIN = "ff14sb_off_impropers_0.0.0.3.offxml"
+WATER_RESIDUES = ["WAT", "HOH"]
+LIGAND_RESIDUES = ["UNK", "LIG"]
+ION_RESIDUES = {"NA": "sodium", "CL": "chloride"}
+DEFAULT_INPUT_PATH = (
+    "/Users/ingrid/Projects/EasyMD/easy-md/example/output/openff_topology.json"
+)
+DEFAULT_OUTPUT_PATH = (
+    "/Users/ingrid/Projects/EasyMD/easy-md/example/output/4W52_solvated_complex.prmtop"
+)
+
+
+# ------------------------------------------------------------------------------
+# Helper Functions
+# ------------------------------------------------------------------------------
 
 
 def validate_output_path(file_path: Union[str, Path]) -> Path:
-    """Validate that an output file path is writable."""
     path = Path(file_path)
     parent_dir = path.parent
     parent_dir.mkdir(parents=True, exist_ok=True)
-    assert os.access(parent_dir, os.W_OK), f"No write permission for directory: {parent_dir}"
+
+    if not os.access(parent_dir, os.W_OK):
+        logger.error(f"No write permission for directory: {parent_dir}")
+        raise AssertionError(f"No write permission for directory: {parent_dir}")
+
     return path
 
 
-def validate_prmtop(prmtop_path):
-    """Validate the AMBER topology file."""
-     
-    # Load the AMBER files into a ParmEd structure for validation
-    #prmtop_path needs to be string.
-    amber_structure = parmed.load_file(prmtop_path)
+def _count_residues_by_type(amber_structure: parmed.Structure) -> dict:
+    residue_counts = {}
 
-    # # Validate input files exist and are readable
-    # prmtop_path = Path(prmtop_path)
-    # # inpcrd_path = Path(inpcrd_path)
-    # assert prmtop_path.exists(), f"Topology file not found: {prmtop_path}"
-    # # assert inpcrd_path.exists(), f"Coordinate file not found: {inpcrd_path}"
-    # assert os.access(prmtop_path, os.R_OK), f"No read permission for topology file: {prmtop_path}"
-    # # assert os.access(inpcrd_path, os.R_OK), f"No read permission for coordinate file: {inpcrd_path}"
-   
+    # Count water molecules
+    water_residues = [
+        res for res in amber_structure.residues if res.name in WATER_RESIDUES
+    ]
+    residue_counts["water"] = len(water_residues)
 
-    # Check unique residues 
-    unique_residues = set(residue.name for residue in amber_structure.residues)
-    logger.info(f"Residues in AMBER structure: {unique_residues}")
+    # Count ions
+    for ion_code, ion_name in ION_RESIDUES.items():
+        ions = [res for res in amber_structure.residues if res.name == ion_code]
+        residue_counts[ion_name] = len(ions)
 
-    # Check for water and ions and ligand
-    water_residues = [res for res in amber_structure.residues if res.name in ['WAT', 'HOH']]
-    sodium_ions = [res for res in amber_structure.residues if res.name == 'NA']
-    chloride_ions = [res for res in amber_structure.residues if res.name == 'CL']
-    ligand = [res for res in amber_structure.residues if res.name in ['UNK', 'LIG']]
-    logger.info(f"Number of water molecules: {len(water_residues)}")
-    logger.info(f"Number of sodium ions: {len(sodium_ions)}")
-    logger.info(f"Number of chloride ions: {len(chloride_ions)}")
-    logger.info(f"Number of ligands: {len(ligand)}")
+    # Count ligands
+    ligand_residues = [
+        res for res in amber_structure.residues if res.name in LIGAND_RESIDUES
+    ]
+    residue_counts["ligand"] = len(ligand_residues)
 
-    # Check for multiple molecules
-    logger.info("\nChecking for multiple molecules:")
+    return residue_counts
+
+
+def _find_molecules(amber_structure: parmed.Structure) -> List[Set]:
+    """Find separate molecules in the AMBER structure."""
     molecules = []
-    current_molecule = set()
     remaining_atoms = set(amber_structure.atoms)
 
     while remaining_atoms:
         start_atom = remaining_atoms.pop()
         current_molecule = {start_atom}
         to_process = {start_atom}
-        
+
         while to_process:
             atom = to_process.pop()
             for bonded_atom in atom.bond_partners:
@@ -96,84 +112,167 @@ def validate_prmtop(prmtop_path):
                     current_molecule.add(bonded_atom)
                     to_process.add(bonded_atom)
                     remaining_atoms.remove(bonded_atom)
+
         molecules.append(current_molecule)
+
+    return molecules
+
+
+def _check_problematic_bonds(amber_structure: parmed.Structure) -> List[str]:
+    """Check for bonds with missing type information."""
+    problematic_bonds = []
+
+    for bond in amber_structure.bonds:
+        if bond.type is None:
+            atom1_info = (
+                f"{bond.atom1.residue.name} "
+                f"{bond.atom1.residue.idx + 1} "
+                f"{bond.atom1.name}"
+            )
+            atom2_info = (
+                f"{bond.atom2.residue.name} "
+                f"{bond.atom2.residue.idx + 1} "
+                f"{bond.atom2.name}"
+            )
+            problematic_bonds.append(f"Bond between {atom1_info} and {atom2_info}")
+
+    return problematic_bonds
+
+
+def validate_prmtop(prmtop_path: Union[str, Path]) -> None:
+    logger.info("Validating AMBER topology file...")
+    amber_structure = parmed.load_file(str(prmtop_path))
+
+    # Check unique residues
+    unique_residues = set(residue.name for residue in amber_structure.residues)
+    logger.info(f"Residues in AMBER structure: {unique_residues}")
+
+    # Count different types of residues
+    residue_counts = _count_residues_by_type(amber_structure)
+    logger.info(f"Number of water molecules: {residue_counts['water']}")
+    logger.info(f"Number of sodium ions: {residue_counts['sodium']}")
+    logger.info(f"Number of chloride ions: {residue_counts['chloride']}")
+    logger.info(f"Number of ligands: {residue_counts['ligand']}")
+
+    # Check for multiple molecules
+    logger.info("Checking for multiple molecules:")
+    molecules = _find_molecules(amber_structure)
     logger.info(f"Found {len(molecules)} separate molecules")
 
     # Check bonds with missing type information
-    problematic_bonds = []
-    for bond in amber_structure.bonds:
-        if bond.type is None:
-            atom1_info = f"{bond.atom1.residue.name} {bond.atom1.residue.idx+1} {bond.atom1.name}"
-            atom2_info = f"{bond.atom2.residue.name} {bond.atom2.residue.idx+1} {bond.atom2.name}"
-            problematic_bonds.append(f"Bond between {atom1_info} and {atom2_info}")
-    
+    problematic_bonds = _check_problematic_bonds(amber_structure)
+
     if problematic_bonds:
         logger.warning("⚠️ Warning: Found bonds with missing type information:")
         for bond in problematic_bonds:
             logger.warning(f"  - {bond}")
-        logger.warning("\nThis might indicate:")
+        logger.warning("This might indicate:")
         logger.warning("1. Missing force field parameters")
         logger.warning("2. Incompatible force field types")
         logger.warning("3. Issues with ligand parameters")
-        raise ValueError("Cannot create Amber topology due to missing bond type information")
-    
+        raise ValueError(
+            "Cannot create Amber topology due to missing bond type information"
+        )
+
     logger.info("✅ Successfully validated AMBER topology file")
 
 
-#------------------------------------------------------------------------------
-# Conversion
-#------------------------------------------------------------------------------
-def omm_to_prmtop(off_top, output_prmtop_path, output_inpcrd_path):
-    """Convert OpenFF topology to AMBER topology."""
-    # Validate input file
-    off_top = Path(off_top)
-    assert off_top.exists(), f"Input file not found: {off_top}"
-    assert os.access(off_top, os.R_OK), f"No read permission for file: {off_top}"
-    
-    # Validate output paths
-    output_prmtop_path = validate_output_path(output_prmtop_path)
-    output_inpcrd_path = validate_output_path(output_inpcrd_path)
-
-    off_top = load_openff_topology_from_json(off_top)
-    sage_ff14sb = ForceField("openff-2.0.0.offxml", "ff14sb_off_impropers_0.0.0.3.offxml")
-    interchange = sage_ff14sb.create_interchange(off_top)
-    omm_system = interchange.to_openmm(add_constrained_forces=True)
-    omm_top = interchange.to_openmm_topology()
-    parmed_structure = parmed.openmm.load_topology(omm_top, omm_system)
-    parmed_structure.save(output_prmtop_path, overwrite=True)
+# ------------------------------------------------------------------------------
+# Conversion Functions
+# ------------------------------------------------------------------------------
 
 
-def omm_to_prmtop2(off_top, output_prmtop_path):
-    # Convert to ParmEd Structure
-    # omm_system = load_openmm_system_from_xml(omm_system)
-    # omm_top = load_openmm_topology_from_pickle(omm_top)
-    off_top = load_openff_topology_from_json(off_top)
+def offtopology_to_prmtop(
+    off_top: Union[str, Path], output_prmtop_path: Union[str, Path]
+) -> None:
+    logger.info(f"Converting OpenFF topology to AMBER topology...")
+
+    # Load and convert topology
+    off_topology = load_openff_topology_from_json(off_top)
+
+    found = False
+    unique_residues = set()
+    for molecule in off_topology.molecules:
+        for atom in molecule.atoms:
+            atom_count = molecule.n_atoms
+            if atom_count < 100:  # heuristic: ligands often <100 atoms
+                found = True
+                break
+
+    if found:
+        logger.info(f"✅ Found ligand in topology (molecule under 100 atoms)")
+    else:
+        logger.error("❌ ligand not found in topology. Halting conversion.")
+        raise ValueError("ligand not found in the OpenFF topology.")
 
     sage_ff14sb = ForceField("openff-2.0.0.offxml", "ff14sb_off_impropers_0.0.3.offxml")
-    interchange = sage_ff14sb.create_interchange(off_top)
+    # sage_ff14sb = ForceField(FF_SMALL_MOLECULE, FF_PROTEIN)
+    interchange = sage_ff14sb.create_interchange(off_topology)
 
+    # Convert to OpenMM
     omm_system = interchange.to_openmm(add_constrained_forces=True)
-    omm_top = interchange.to_openmm_topology()
+    omm_topology = interchange.to_openmm_topology()
 
-    # Create ParmEd structure
-    parmed_structure = parmed.openmm.load_topology(omm_top, omm_system)
-    parmed_structure.save(output_prmtop_path, overwrite=True)
+    # Create ParmEd structure and save
+    parmed_structure = parmed.openmm.load_topology(omm_topology, omm_system)
+    parmed_structure.save(str(output_prmtop_path), overwrite=True)
+
+    logger.info(
+        f"✅ Successfully converted OpenFF topology to AMBER topology: {output_prmtop_path}"
+    )
 
 
+def run_ante_mmpbsa(prmtop_path: Union[str, Path]) -> None:
+    command = [
+        "ante-MMPBSA.py",
+        "-p",
+        prmtop_path,
+        "-c",
+        "/Users/ingrid/Projects/EasyMD/easy-md/example/output/system_complex.prmtop",
+        "-r",
+        "/Users/ingrid/Projects/EasyMD/easy-md/example/output/receptor.prmtop",
+        "-l",
+        "/Users/ingrid/Projects/EasyMD/easy-md/example/output/ligand.prmtop",
+        "-s",
+        ":HOH:CL:NA",
+        "-n",
+        ":UNK",
+        "--radii",
+        "mbondi2",
+    ]
 
-#------------------------------------------------------------------------------
+    logger.info("Running ante-MMPBSA.py with the following command:")
+    logger.info(" ".join(command))
+
+    try:
+        subprocess.run(command, check=True)
+        logger.info("✅ ante-MMPBSA.py ran successfully.")
+    except subprocess.CalledProcessError as e:
+        logger.error(f"❌ ante-MMPBSA.py failed with return code {e.returncode}")
+    except FileNotFoundError:
+        logger.error("❌ ante-MMPBSA.py not found. Is it installed and in your PATH?")
+
+
+# ------------------------------------------------------------------------------
 # Main Function
-#------------------------------------------------------------------------------
-def main():
+# ------------------------------------------------------------------------------
+
+
+def main() -> None:
+    logger.info("========================================================")
+    logger.info("🛠️ MM/PBSA Calculation")
+    logger.info("========================================================")
+
     try:
         # Define paths
-        off_topology_json_path = '/Users/ingrid/Projects/EasyMD/easy-md/example/output/openff_topology.json'
-        output_prmtop_path = '/Users/ingrid/Projects/EasyMD/easy-md/example/output/4W52_solvated_complex.prmtop'
-        output_inpcrd_path = '/Users/ingrid/Projects/EasyMD/easy-md/example/output/4W52_solvated_complex.inpcrd'
+        off_topology_json_path = DEFAULT_INPUT_PATH
+        output_prmtop_path = DEFAULT_OUTPUT_PATH
 
         # Convert OpenFF topology to AMBER topology
-        omm_to_prmtop2(off_topology_json_path, output_prmtop_path)
+        offtopology_to_prmtop(off_topology_json_path, output_prmtop_path)
         validate_prmtop(output_prmtop_path)
+        run_ante_mmpbsa(output_prmtop_path)
+
     except FileNotFoundError as e:
         logger.error(f"File not found: {e}")
         raise
@@ -186,6 +285,7 @@ def main():
     except Exception as e:
         logger.error(f"Unexpected error: {e}")
         raise
+
 
 if __name__ == "__main__":
     main()

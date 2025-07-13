@@ -1,8 +1,8 @@
-# Third-party imports
+# Standard library imports
 import numpy as np
 import os
 
-# from openmm.app import PDBFile, ForceField,  NoCutoff, HBonds
+# Third-party imports
 from openmm import(
     LangevinMiddleIntegrator,
     MonteCarloBarostat, 
@@ -23,9 +23,17 @@ from openmm.app import(Simulation,
                         PDBFile
 )
 
+# Custom imports
+from easy_md.utils import info_logger
+import logging
+
+logger = logging.getLogger(__name__)
+
+
 #------------------------------------------------------------------------------
 # Helper Classes
 #------------------------------------------------------------------------------
+
 class CheckpointReporter:
     """Reporter for saving simulation checkpoints."""
     def __init__(self, file, reportInterval):
@@ -43,6 +51,7 @@ class CheckpointReporter:
 #------------------------------------------------------------------------------
 # Helper Functions
 #------------------------------------------------------------------------------
+
 def setup_reporters(simulation, log_output, trajectory_output, checkpoint_output, saving_steps, total_steps):
     """Configures and adds state and trajectory reporters to the simulation."""
     # Clear any existing reporters
@@ -74,7 +83,7 @@ def setup_reporters(simulation, log_output, trajectory_output, checkpoint_output
 def setup_simulation(omm_system, omm_top, platform_name, platform_properties, temperature, friction_coef, timestep):
     """Sets up the simulation with specified parameters and returns the configured simulation object."""
     platform = Platform.getPlatformByName(platform_name)
-    print(f"Platform being used: {platform.getName()}")
+    logger.info(f"Platform being used: {platform.getName()}")
 
     # Initialize integrator
     integrator = LangevinMiddleIntegrator(
@@ -87,7 +96,7 @@ def setup_simulation(omm_system, omm_top, platform_name, platform_properties, te
     if platform_name == "CUDA":
         simulation = Simulation(omm_top, omm_system, integrator, platform, platform_properties)
         precision = platform.getPropertyValue(simulation.context, "Precision")
-        print(f"Precision being used: {precision}")
+        logger.info(f"Precision being used: {precision}")
     else:
         simulation = Simulation(omm_top, omm_system, integrator, platform)
     
@@ -98,7 +107,7 @@ def setup_force_restraints(reference_structure, residue_indices, force_constant=
     ref_pdb = PDBFile(reference_structure)
     ref_positions = ref_pdb.getPositions()
 
-    print(f"Adding harmonic positional restraints with force constant {force_constant} kJ/mol/nm^2...")
+    logger.info(f"Adding harmonic positional restraints with force constant {force_constant} kJ/mol/nm^2...")
     # Reduce force constant to avoid instability
     force_k = force_constant * kilojoule_per_mole/nanometer**2   
     restraint_force = CustomExternalForce("0.5 * k * ((x-x0)^2 + (y-y0)^2 + (z-z0)^2)")
@@ -129,14 +138,14 @@ def setup_force_restraints(reference_structure, residue_indices, force_constant=
             chain_id = atom.residue.chain.id
             chain_restraints[chain_id] = chain_restraints.get(chain_id, 0) + 1
 
-    print(f"Added positional restraints to {num_restrained} heavy atoms")
-    print(f"Restraints per chain: {chain_restraints}")
+    logger.info(f"Added positional restraints to {num_restrained} heavy atoms")
+    logger.info(f"Restraints per chain: {chain_restraints}")
 
     return restraint_force
 
 def setup_barostat(temperature, pressure, barostat_frequency, use_anisotropic=False):
     """Configure and return appropriate barostat based on simulation type."""
-    print(f"Setting up barostat with pressure {pressure} bar and temperature {temperature} K")
+    logger.info(f"Setting up barostat with pressure {pressure} bar and temperature {temperature} K")
     if use_anisotropic:
         pressure_tuple = (pressure, pressure, pressure)
         scaleXYZ = (True, True, True)
@@ -146,6 +155,7 @@ def setup_barostat(temperature, pressure, barostat_frequency, use_anisotropic=Fa
             barostat_frequency
         )
     else:
+
         return MonteCarloBarostat(pressure, temperature, barostat_frequency)
     
 def load_state_or_checkpoint(simulation, temp, state_file=None, checkpoint_file=None):
@@ -154,8 +164,10 @@ def load_state_or_checkpoint(simulation, temp, state_file=None, checkpoint_file=
         # If load_from_state is explicitly True, or if state_file is provided and exists
         if (state_file and os.path.exists(state_file)):
             if not state_file:
+                logger.error("state_file must be provided when load_from_state is True")
                 raise ValueError("state_file must be provided when load_from_state is True")
             if not isinstance(state_file, str):
+                logger.error("state_file must be a string path")
                 raise TypeError("state_file must be a string path")
             
             try:
@@ -163,33 +175,37 @@ def load_state_or_checkpoint(simulation, temp, state_file=None, checkpoint_file=
                 simulation.currentStep = 0
                 simulation.context.setTime(0)
                 simulation.context.setVelocitiesToTemperature(temp)
-                print(f"Successfully loaded state from {state_file}")
+                logger.info(f"Successfully loaded state from {state_file}")
             except Exception as e:
+                logger.error(f"Failed to load state file {state_file}: {str(e)}")
                 raise RuntimeError(f"Failed to load state file {state_file}: {str(e)}")
                 
         elif checkpoint_file:
             if not isinstance(checkpoint_file, str):
+                logger.error("checkpoint_file must be a string path")
                 raise TypeError("checkpoint_file must be a string path")
                 
             try:
                 simulation.loadCheckpoint(checkpoint_file)
-                print(f"Successfully loaded checkpoint from {checkpoint_file}")
+                logger.info(f"Successfully loaded checkpoint from {checkpoint_file}")
             except Exception as e:
+                logger.error(f"Failed to load checkpoint file {checkpoint_file}: {str(e)}")
                 raise RuntimeError(f"Failed to load checkpoint file {checkpoint_file}: {str(e)}")
         else:
+            logger.error("Either state_file (with load_from_state=True) or checkpoint_file must be provided")
             raise ValueError("Either state_file (with load_from_state=True) or checkpoint_file must be provided")
             
     except FileNotFoundError as e:
-        print(f"Error: File not found - {str(e)}")
+        logger.error(f"Error: File not found - {str(e)}")
         raise
     except (ValueError, TypeError) as e:
-        print(f"Error: Invalid input - {str(e)}")
+        logger.error(f"Error: Invalid input - {str(e)}")
         raise
     except RuntimeError as e:
-        print(f"Error: {str(e)}")
+        logger.error(f"Error: {str(e)}")
         raise
     except Exception as e:
-        print(f"Unexpected error occurred: {str(e)}")
+        logger.error(f"Unexpected error occurred: {str(e)}")
         raise
         
     return simulation
@@ -197,41 +213,33 @@ def load_state_or_checkpoint(simulation, temp, state_file=None, checkpoint_file=
 def print_constraint_info(system, top):
     """Prints constraint information from the system."""
     # Debug: Print topology constraint information
-    print(f"Number of constraints: {system.getNumConstraints()}")
+    logger.info(f"Number of constraints: {system.getNumConstraints()}")
     for i in range(min(5, system.getNumConstraints())):  # Print first 5 constraints as example
         constraint = system.getConstraintParameters(i)
-        print(f"Constraint {i}: particles {constraint[0]}-{constraint[1]}, distance {constraint[2]}")
+        logger.info(f"Constraint {i}: particles {constraint[0]}-{constraint[1]}, distance {constraint[2]}")
 
     bonds = list(top.bonds())
-    print(f"Number of bonds in topology: {len(bonds)}")
+    logger.info(f"Number of bonds in topology: {len(bonds)}")
     if bonds:
-        print("First few bonds:")
+        logger.info("First few bonds:")
         for bond in bonds[:5]:
-            print(f"Bond: {bond[0].name}-{bond[1].name}")
+            logger.info(f"Bond: {bond[0].name}-{bond[1].name}")
 
 def print_system_charge(pdb_filepath, config):
     pdb = PDBFile(pdb_filepath)
-
-    # Load a standard force field (AMBER in this case)
     forcefield = ForceField(config['forcefield_protein'], config['forcefield_solvent'])
-
-    # Create a system from the PDB topology and the force field
     system = forcefield.createSystem(pdb.topology, nonbondedMethod=NoCutoff, constraints=HBonds)
-
-    # Initialize a variable to hold the total charge
-    total_charge = 0.0
-
+   
     # Iterate over all forces to find the NonbondedForce, which contains charge information
+    total_charge = 0.0
     for force in system.getForces():
         if isinstance(force, openmm.NonbondedForce):
             for i in range(force.getNumParticles()):
                 # For each particle (atom) in the force, extract the charge (the first element of the tuple returned by getParticleParameters)
                 charge, _, _ = force.getParticleParameters(i)
-                # Sum up the charges
                 total_charge += charge.value_in_unit(unit.elementary_charge)
 
-    # Print the total charge of the system
-    print(f"Total system charge: {total_charge} e")
+    logger.info(f"Total system charge: {total_charge} e")
 
 def check_equilibration(simulation, temp_std_threshold, energy_std_threshold, temp_window, energy_window, window_size):
     """Checks if the system has reached equilibrium based on temperature and energy fluctuations."""
@@ -243,12 +251,12 @@ def check_equilibration(simulation, temp_std_threshold, energy_std_threshold, te
     if len(temp_window) == window_size:
         temp_std = np.std(temp_window)
         energy_std = np.std(energy_window)
-        print(f"Temperature std dev: {temp_std:.2f} K")
-        print(f"Potential Energy std dev: {energy_std:.2f} kJ/mol")
+        logger.info(f"Temperature std dev: {temp_std:.2f} K")
+        logger.info(f"Potential Energy std dev: {energy_std:.2f} kJ/mol")
         if temp_std < temp_std_threshold and energy_std < energy_std_threshold:
-            print("\nSystem has reached equilibrium!")
-            print(f"Temperature std dev: {temp_std:.2f} K (threshold: {temp_std_threshold} K)")
-            print(f"Potential Energy std dev: {energy_std:.2f} kJ/mol (threshold: {energy_std_threshold} kJ/mol)")
+            logger.info("\nSystem has reached equilibrium!")
+            logger.info(f"Temperature std dev: {temp_std:.2f} K (threshold: {temp_std_threshold} K)")
+            logger.info(f"Potential Energy std dev: {energy_std:.2f} kJ/mol (threshold: {energy_std_threshold} kJ/mol)")
             return True
         
     return False
@@ -319,7 +327,7 @@ def transfer_state_with_precision(temp_omm_system, temp_omm_top, checkpoint_file
             # Determine simulation 
             temp_simulation.loadCheckpoint(checkpoint_file)
             source_precision = precision
-            print(f"Successfully loaded checkpoint with {precision} precision")
+            logger.info(f"Successfully loaded checkpoint with {precision} precision")
 
             #  Once you have extracted the state from the checkpoint using your 
             # transfer_state_with_precision function, you can apply that state to a 
@@ -329,11 +337,10 @@ def transfer_state_with_precision(temp_omm_system, temp_omm_top, checkpoint_file
             state = temp_simulation.context.getState(getPositions=True, getVelocities=True, getEnergy=True)
             return state
         except Exception as e:
-            print(f"Failed to load checkpoint with {precision} precision: {str(e)}")
+            logger.error(f"Failed to load checkpoint with {precision} precision: {str(e)}")
             continue
     
     if source_precision is None:
+        logger.error("Could not determine the precision of the checkpoint file")
         raise ValueError("Could not determine the precision of the checkpoint file")
     
-
-
