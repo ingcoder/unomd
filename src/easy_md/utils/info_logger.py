@@ -12,7 +12,7 @@ import os
 
 # Define log file path
 app_dir = os.path.dirname(os.path.dirname(__file__))  # Go up from utils/ to easy_md/
-log_file_path = os.path.join(app_dir, 'info_eror.log')
+log_file_path = os.path.join(app_dir, 'logs/info_eror.log')
 
 # Create rotating file handler
 rotating_handler = RotatingFileHandler(

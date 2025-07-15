@@ -32,6 +32,7 @@ logger = logging.getLogger(__name__)
 # Helper Functions
 # --------------------------------------------------------------------------
 
+
 def check_for_large_molecules(topology, atom_count_threshold=100):
     """Sanity check if there are any large molecules in the topology,
     which might indicate the presence of proteins or polymers."""
@@ -167,6 +168,7 @@ def validate_system_consistency(
 # Create OpenMM System and Topology Files
 # --------------------------------------------------------------------------
 
+
 @time_tracker
 def save_openmm_system_topology(
     interchange,
@@ -212,6 +214,7 @@ def save_openmm_system_topology(
 # Parameterize OpenFF System
 # --------------------------------------------------------------------------
 
+
 @time_tracker
 def parameterize_openff_system(openff_topology_path: str):
     """Create and parameterize OpenFF system from topology."""
@@ -240,6 +243,7 @@ def parameterize_openff_system(openff_topology_path: str):
 # --------------------------------------------------------------------------
 # Create OpenFF Topology For Solvated System
 # --------------------------------------------------------------------------
+
 
 @time_tracker
 def create_openff_topology(
@@ -313,6 +317,7 @@ def create_openff_topology(
 # --------------------------------------------------------------------------
 # Main Function
 # --------------------------------------------------------------------------
+
 
 @time_tracker
 def main(config, print_detailed_info=False):

@@ -26,13 +26,15 @@ import os
 from pathlib import Path
 from typing import List, Set, Union
 import subprocess
+import yaml
+import glob
 
 # Third-party imports
 import parmed
 from openff.toolkit import ForceField
 
 # Custom imports
-from easy_md.utils.fileparser import load_openff_topology_from_json
+from easy_md.utils.fileparser import load_openff_topology_from_json, time_tracker
 from easy_md.utils import info_logger
 import logging
 
@@ -42,34 +44,14 @@ logger = logging.getLogger(__name__)
 # Constants
 # ------------------------------------------------------------------------------
 
-FF_SMALL_MOLECULE = ("openff-2.0.0.offxml",)
-FF_PROTEIN = "ff14sb_off_impropers_0.0.0.3.offxml"
 WATER_RESIDUES = ["WAT", "HOH"]
 LIGAND_RESIDUES = ["UNK", "LIG"]
 ION_RESIDUES = {"NA": "sodium", "CL": "chloride"}
-DEFAULT_INPUT_PATH = (
-    "/Users/ingrid/Projects/EasyMD/easy-md/example/output/openff_topology.json"
-)
-DEFAULT_OUTPUT_PATH = (
-    "/Users/ingrid/Projects/EasyMD/easy-md/example/output/4W52_solvated_complex.prmtop"
-)
 
 
 # ------------------------------------------------------------------------------
 # Helper Functions
 # ------------------------------------------------------------------------------
-
-
-def validate_output_path(file_path: Union[str, Path]) -> Path:
-    path = Path(file_path)
-    parent_dir = path.parent
-    parent_dir.mkdir(parents=True, exist_ok=True)
-
-    if not os.access(parent_dir, os.W_OK):
-        logger.error(f"No write permission for directory: {parent_dir}")
-        raise AssertionError(f"No write permission for directory: {parent_dir}")
-
-    return path
 
 
 def _count_residues_by_type(amber_structure: parmed.Structure) -> dict:
@@ -91,6 +73,8 @@ def _count_residues_by_type(amber_structure: parmed.Structure) -> dict:
         res for res in amber_structure.residues if res.name in LIGAND_RESIDUES
     ]
     residue_counts["ligand"] = len(ligand_residues)
+
+    logger.info(f"Residue counts: {residue_counts}")
 
     return residue_counts
 
@@ -114,6 +98,7 @@ def _find_molecules(amber_structure: parmed.Structure) -> List[Set]:
                     remaining_atoms.remove(bonded_atom)
 
         molecules.append(current_molecule)
+    logger.info(f"Number of seperate molecules: {len(molecules)}")
 
     return molecules
 
@@ -136,12 +121,13 @@ def _check_problematic_bonds(amber_structure: parmed.Structure) -> List[str]:
             )
             problematic_bonds.append(f"Bond between {atom1_info} and {atom2_info}")
 
+    logger.info(f"Problematic bonds: {problematic_bonds}")
     return problematic_bonds
 
 
-def validate_prmtop(prmtop_path: Union[str, Path]) -> None:
+def validate_prmtop(config) -> None:
     logger.info("Validating AMBER topology file...")
-    amber_structure = parmed.load_file(str(prmtop_path))
+    amber_structure = parmed.load_file(config["path_amber_solvated"])
 
     # Check unique residues
     unique_residues = set(residue.name for residue in amber_structure.residues)
@@ -177,21 +163,41 @@ def validate_prmtop(prmtop_path: Union[str, Path]) -> None:
     logger.info("✅ Successfully validated AMBER topology file")
 
 
+def get_last_final_dcd(config):
+    """Getting the last final dcd file."""
+    try:
+        trajectory_dir = os.path.dirname(config["path_md_image"])
+        dcd_files = glob.glob(os.path.join(trajectory_dir, "final_md*.dcd"))
+        dcd_files.sort(key=os.path.getmtime)
+        logger.info(f"Last final dcd file: {dcd_files[-1]}")
+        return dcd_files[-1]
+    except Exception as e:
+        logger.error(f"Error getting last final dcd file: {e}")
+        raise 
+    
+def clean_mmpbsa_files():
+    """Cleaning the mmpbsa files."""
+    script_dir = Path(__file__).resolve().parent
+    for file in script_dir.glob("_MMPBSA*"):
+        try:
+            file.unlink()
+            logger.info(f"Deleted: {file}")
+        except Exception as e:
+            logger.error(f"Could not delete {file}: {e}")
+
+
 # ------------------------------------------------------------------------------
 # Conversion Functions
 # ------------------------------------------------------------------------------
 
 
-def offtopology_to_prmtop(
-    off_top: Union[str, Path], output_prmtop_path: Union[str, Path]
-) -> None:
+def offtopology_to_prmtop(config) -> None:
     logger.info(f"Converting OpenFF topology to AMBER topology...")
 
     # Load and convert topology
-    off_topology = load_openff_topology_from_json(off_top)
+    off_topology = load_openff_topology_from_json(config["path_openff_topology"])
 
     found = False
-    unique_residues = set()
     for molecule in off_topology.molecules:
         for atom in molecule.atoms:
             atom_count = molecule.n_atoms
@@ -205,8 +211,10 @@ def offtopology_to_prmtop(
         logger.error("❌ ligand not found in topology. Halting conversion.")
         raise ValueError("ligand not found in the OpenFF topology.")
 
-    sage_ff14sb = ForceField("openff-2.0.0.offxml", "ff14sb_off_impropers_0.0.3.offxml")
-    # sage_ff14sb = ForceField(FF_SMALL_MOLECULE, FF_PROTEIN)
+    # sage_ff14sb = ForceField("openff-2.0.0.offxml", "ff14sb_off_impropers_0.0.3.offxml")
+    sage_ff14sb = ForceField(
+        config["ff_small_molecule_openff"], config["ff_protein_openff"]
+    )
     interchange = sage_ff14sb.create_interchange(off_topology)
 
     # Convert to OpenMM
@@ -215,24 +223,26 @@ def offtopology_to_prmtop(
 
     # Create ParmEd structure and save
     parmed_structure = parmed.openmm.load_topology(omm_topology, omm_system)
-    parmed_structure.save(str(output_prmtop_path), overwrite=True)
+    parmed_structure.save(str(config["path_amber_solvated"]), overwrite=True)
 
     logger.info(
-        f"✅ Successfully converted OpenFF topology to AMBER topology: {output_prmtop_path}"
+        f"✅ Successfully converted OpenFF topology to AMBER topology: {config['path_amber_solvated']}"
     )
 
+@time_tracker
+def run_ante_mmpbsa(config) -> None:
+    """Preparing the amber input topology files for the MMPBSA calculation."""
 
-def run_ante_mmpbsa(prmtop_path: Union[str, Path]) -> None:
     command = [
         "ante-MMPBSA.py",
         "-p",
-        prmtop_path,
+        config["path_amber_solvated"],
         "-c",
-        "/Users/ingrid/Projects/EasyMD/easy-md/example/output/system_complex.prmtop",
+        config["path_amber_complex"],
         "-r",
-        "/Users/ingrid/Projects/EasyMD/easy-md/example/output/receptor.prmtop",
+        config["path_amber_receptor"],
         "-l",
-        "/Users/ingrid/Projects/EasyMD/easy-md/example/output/ligand.prmtop",
+        config["path_amber_ligand"],
         "-s",
         ":HOH:CL:NA",
         "-n",
@@ -252,26 +262,95 @@ def run_ante_mmpbsa(prmtop_path: Union[str, Path]) -> None:
     except FileNotFoundError:
         logger.error("❌ ante-MMPBSA.py not found. Is it installed and in your PATH?")
 
+@time_tracker
+def run_mmpbsa(config) -> None:
+    """Running the MMPBSA calculation."""
+
+    last_final_dcd = get_last_final_dcd(config)
+
+    command = [
+        "MMPBSA.py",
+        "-O",
+        "-i",
+        config["path_mmpbsa_in"],
+        "-o",
+        config["path_mmpbsa_results"],
+        "-sp",
+        config["path_amber_solvated"],
+        "-cp",
+        config["path_amber_complex"],
+        "-rp",
+        config["path_amber_receptor"],
+        "-lp",
+        config["path_amber_ligand"],
+        "-y",
+        last_final_dcd,
+    ]
+
+    logger.info("Running mmpbsa.py with the following command:")
+    logger.info(" ".join(command))
+
+    try:
+        subprocess.run(command, check=True)
+        logger.info("✅ mmpbsa.py ran successfully.")
+    except subprocess.CalledProcessError as e:
+        logger.error(f"❌ mmpbsa.py failed with return code {e.returncode}")
+    except FileNotFoundError:
+        logger.error("❌ mmpbsa.py not found. Is it installed and in your PATH?")
+
+
+def create_mmpbsa_input_file(config):
+    """Creating the mmpbsa input file."""
+    try:
+        with open(config["path_mmpbsa_in"], "w") as f:
+            f.write("&general\n")
+            f.write("interval   = 10,\n")
+            f.write("verbose    = 2,\n")
+            f.write("endframe=100,\n")
+            f.write("keep_files=2,\n")
+            f.write("strip_mask= :HOH:CL:NA,\n")
+            f.write("\n")
+            f.write("/\n")
+            f.write("&gb\n")
+            f.write("igb=2, saltcon=0.150,\n")
+            f.write("/\n")
+            f.write("&pb\n")
+            f.write("istrng=0.150,inp=2, radiopt=0, prbrad=1.4,\n")
+            f.write("/\n")
+        logger.info(f"✅ Successfully created mmpbsa input file: {config['path_mmpbsa_in']}")
+    except Exception as e:
+        logger.error(f"Error creating mmpbsa input file: {e}")
+        raise 
+
+
+def export_prmtop(config):
+    # Convert OpenFF topology to AMBER topology
+    offtopology_to_prmtop(config)
+    validate_prmtop(config)
 
 # ------------------------------------------------------------------------------
 # Main Function
 # ------------------------------------------------------------------------------
 
 
-def main() -> None:
+def main(config_filepath) -> None:
     logger.info("========================================================")
     logger.info("🛠️ MM/PBSA Calculation")
     logger.info("========================================================")
 
-    try:
-        # Define paths
-        off_topology_json_path = DEFAULT_INPUT_PATH
-        output_prmtop_path = DEFAULT_OUTPUT_PATH
+    if config_filepath is not None:
+        with open(config_filepath, "r") as f:
+            config = yaml.safe_load(f)
+    else:
+        logger.error("No config file provided. Please provide a config file.")
+        raise ValueError("No config file provided. Please provide a config file.")
 
-        # Convert OpenFF topology to AMBER topology
-        offtopology_to_prmtop(off_topology_json_path, output_prmtop_path)
-        validate_prmtop(output_prmtop_path)
-        run_ante_mmpbsa(output_prmtop_path)
+    create_mmpbsa_input_file(config)
+
+    try:
+        export_prmtop(config)
+        run_ante_mmpbsa(config)
+        run_mmpbsa(config)
 
     except FileNotFoundError as e:
         logger.error(f"File not found: {e}")
@@ -288,4 +367,8 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    config_filepath = (
+        "/Users/ingrid/Projects/EasyMD/easy-md/example/config/simulation_config.yaml"
+    )
+    clean_mmpbsa_files()
+    # main(config_filepath)
