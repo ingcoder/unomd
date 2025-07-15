@@ -21,41 +21,53 @@ Run the script:
 python script.py
 """
 
-from openmm.app import *
-from openmm import *
-from openmm.unit import nanometer as nm, molar
-from openmm.app import PDBFile, Modeller, ForceField
+# Standard library imports
 import numpy as np
-from pdbfixer import PDBFixer
+
+# Third-party imports
 from openmm.app import PDBFile, Modeller, ForceField
+from openmm import Vec3
+from openmm.unit import nanometer as nm, molar
+from pdbfixer import PDBFixer
+
+# Custom imports & logging
+from easy_md.utils.fileparser import time_tracker
+from easy_md.utils import info_logger
+import logging
 
 
-def add_water(config):    
-    # Initialize PDBFixer
-    fixer = PDBFixer(filename=config.get('path_protein'))
-    
-    # First find and add missing residues
+logger = logging.getLogger(__name__)
+
+
+@time_tracker
+def add_water(config):
+    logger.info("========================================================")
+    logger.info("💧 Solvation")
+    logger.info("========================================================")
+
+    logger.info("Loading PDB file & adding missing hydrogens...")
+    fixer = PDBFixer(filename=config.get("path_protein"))
     fixer.findMissingResidues()
-    
-    # Find missing atoms
     fixer.findMissingAtoms()
     n_missing_heavy = sum(len(v) for v in fixer.missingAtoms.values())
-   
+
     if n_missing_heavy > 0:
-        print(f"Found {n_missing_heavy} missing heavy atoms - adding them now...")
+        logger.info(f"Found {n_missing_heavy} missing heavy atoms - adding them now...")
         fixer.addMissingAtoms()
-        print("Adding missing hydrogens...")
-        fixer.addMissingHydrogens(pH=config.get('solv_pH'))
+        logger.info("Adding missing hydrogens...")
+        fixer.addMissingHydrogens(pH=config.get("solv_pH"))
     else:
-        print("No missing heavy atoms found")
-        print("Adding missing hydrogens...")
-        fixer.addMissingHydrogens(pH=config.get('solv_pH'))
+        logger.info("No missing heavy atoms found")
+        logger.info("Adding missing hydrogens...")
+        fixer.addMissingHydrogens(pH=config.get("solv_pH"))
 
     # Create Modeller instance from fixed structure
     modeller = Modeller(fixer.topology, fixer.positions)
 
     # Extract positions and convert to numpy array
-    positions = np.array([[atom.x, atom.y, atom.z] for atom in modeller.positions.value_in_unit(nm)])
+    positions = np.array(
+        [[atom.x, atom.y, atom.z] for atom in modeller.positions.value_in_unit(nm)]
+    )
 
     # Calculate the min and max along each axis
     min_coords = np.min(positions, axis=0)
@@ -63,40 +75,44 @@ def add_water(config):
     box_dimensions = max_coords - min_coords
 
     # Get forcefield from config
-    forcefield = ForceField(config.get('ff_protein'), config.get('ff_water'))
- 
-    # Define box dimensions
-    x_dimension = box_dimensions[0] + config.get('solv_box_buffer')
-    y_dimension = box_dimensions[1] + config.get('solv_box_buffer')
-    z_dimension = box_dimensions[2] + config.get('solv_box_buffer')
+    forcefield = ForceField(config.get("ff_protein"), config.get("ff_water"))
 
-    print("\nFinal Box Dimensions (nanometers):")
-    print("Width (X-axis):", x_dimension)
-    print("Height (Y-axis):", y_dimension)
-    print("Depth (Z-axis):", z_dimension)
+    # Define box dimensions
+    x_dimension = box_dimensions[0] + config.get("solv_box_buffer")
+    y_dimension = box_dimensions[1] + config.get("solv_box_buffer")
+    z_dimension = box_dimensions[2] + config.get("solv_box_buffer")
+
+    logger.info("Water Box Dimensions (nanometers):")
+    logger.info(f"Width (X-axis): {x_dimension}")
+    logger.info(f"Height (Y-axis): {y_dimension}")
+    logger.info(f"Depth (Z-axis): {z_dimension}")
 
     box_vecs = (
         Vec3(x_dimension, 0, 0) * nm,
         Vec3(0, y_dimension, 0) * nm,
-        Vec3(0, 0, z_dimension) * nm
+        Vec3(0, 0, z_dimension) * nm,
     )
-    
-    print('Adding solvent...')
+
+    logger.info("Adding water, Na+, Cl- ions...")
     try:
-        modeller.addSolvent(forcefield, 
-                            boxVectors=box_vecs, 
-                            ionicStrength=config.get('solv_ionic_strength')*molar,
-                            positiveIon=config.get('solv_positive_ion'),
-                            negativeIon=config.get('solv_negative_ion'),
-                            model=config.get('solv_model', 'tip3p'))
+        modeller.addSolvent(
+            forcefield,
+            boxVectors=box_vecs,
+            ionicStrength=config.get("solv_ionic_strength") * molar,
+            positiveIon=config.get("solv_positive_ion"),
+            negativeIon=config.get("solv_negative_ion"),
+            model=config.get("solv_model", "tip3p"),
+        )
     except Exception as e:
-        print(f"Error adding solvent: {e}")
+        logger.error(f"❌ Error adding solvent: {e}")
         raise
-    
-    with open(config.get('path_protein_solvated'), 'w') as file:
+
+    with open(config.get("path_protein_solvated"), "w") as file:
         PDBFile.writeFile(modeller.topology, modeller.positions, file)
-    print(f"Saved solvated structure to: {config.get('path_protein_solvated')}")
+    logger.info(
+        f"✅ Saved solvated structure to: {config.get('path_protein_solvated')}"
+    )
+
 
 if __name__ == "__main__":
     add_water()
-

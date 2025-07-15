@@ -1,24 +1,37 @@
-from easy_md.main import run_solvation, run_forcefield_parameterization, run_energy_minimization, run_simulation
+from datetime import datetime
+from easy_md.main import (
+    run_solvation,
+    run_forcefield_parameterization,
+    run_energy_minimization,
+    run_simulation,
+    run_mmpbsa,
+)
 from easy_md.utils.config import create_config
+from easy_md.utils import info_logger
+import logging
+
+
+logger = logging.getLogger(__name__)
+
 
 def quickrun(protein_file, ligand_file=None, nsteps=1000, **kwargs):
     """Run a quick molecular dynamics simulation with customizable parameters.
-    
+
     Args:
         protein_file (str): Path to protein PDB file
         ligand_file (str, optional): Path to ligand file. Defaults to None.
         nsteps (int, optional): Number of MD steps. Defaults to 1000.
         **kwargs: Additional configuration parameters. Can include any parameter supported by create_config:
-            
+
             Platform Settings:
                 platform_name (str): Platform for computation. Default: "CPU". Options: ['CPU', 'CUDA']
                 platform_precision (str): Precision mode. Default: "mixed". Options: ['single', 'mixed', 'double']
-            
+
             Integrator Settings:
                 integrator_temperature (float): Temperature in Kelvin. Default: 300.0
                 integrator_friction (float): Friction coefficient in ps^-1. Default: 1.0
                 integrator_timestep (float): Time step in ps. Default: 0.002
-            
+
             Solvation Settings:
                 solv_box_buffer (float): Buffer size in angstroms. Default: 2.5
                 solv_ionic_strength (float): Ionic strength in molar. Default: 0.15
@@ -26,7 +39,7 @@ def quickrun(protein_file, ligand_file=None, nsteps=1000, **kwargs):
                 solv_negative_ion (str): Type of negative ion. Default: "Cl-"
                 solv_model (str): Water model. Default: "tip3p"
                 solv_pH (float): pH of the solvent. Default: 7.0
-            
+
             MD Simulation Settings:
                 md_save_interval (int): Save interval for trajectory. Default: 10
                 md_pressure (float): Pressure in atmospheres. Default: 1.0
@@ -36,19 +49,32 @@ def quickrun(protein_file, ligand_file=None, nsteps=1000, **kwargs):
                 md_load_state (bool): Load previous state if available. Default: True
                 md_restrained_residues (list): List of residues to restrain. Default: []
                 md_npt (bool): Use NPT ensemble. Default: False
-            
+
             And many more - see create_config documentation for full list.
     """
     # Create configuration with all provided parameters
     config = create_config(
-        protein_file=protein_file,
-        ligand_file=ligand_file,
-        md_steps=nsteps,
-        **kwargs
+        protein_file=protein_file, ligand_file=ligand_file, md_steps=nsteps, **kwargs
     )
-    
-    # Run the simulation pipeline
+
+    logger.info("=" * 80)
+    logger.info("🚀 Starting EasyMD quickrun simulation pipeline...")
+    logger.info(
+        "EasyMD is an open-source python tool for running molecular dynamics simulations of proteins and small molecules in single line of code."
+    )
+    logger.info("EasyMD version: 0.1.0")
+    logger.info("EasyMD repository: https://github.com/ingridbf/EasyMD")
+    logger.info("👩‍💻 Author: Ingrid Barbosa-Farias")
+    logger.info("=" * 80)
     run_solvation.add_water(config=config)
     run_forcefield_parameterization.main(config)
     run_energy_minimization.main(config)
     run_simulation.main(config)
+
+    if config["mmpbsa"]:
+        run_mmpbsa.export_prmtop(config)
+        run_mmpbsa.main(config)
+
+    if config["export_prmtop"]:
+        run_mmpbsa.export_prmtop(config)
+

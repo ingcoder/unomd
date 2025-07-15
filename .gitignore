@@ -1,0 +1,8 @@
+# .gitignore
+*/__pycache__/
+*.pyc
+.DS_Store
+example/.DS_Store
+example/output/
+src/easy_md/utils/__pycache__/
+easy-md/logs/
