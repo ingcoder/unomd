@@ -10,7 +10,8 @@ readme = "README.md"
 requires-python = ">=3.9"
 license = {file = "LICENSE"}
 authors = [
-    {name = "EasyMD Developer", email = "developer@example.com"},
+    {name = "Ingrid Barbosa-Farias", email = "ingrid@simatomic.com"},
+    {name = "Omar Arias Gaguancela", email = "omar.arias@example.com"},
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
