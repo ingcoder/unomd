@@ -4,6 +4,7 @@ from easy_md.main import (
     run_forcefield_parameterization,
     run_energy_minimization,
     run_simulation,
+    run_mmpbsa,
 )
 from easy_md.utils.config import create_config
 from easy_md.utils import info_logger
@@ -69,3 +70,11 @@ def quickrun(protein_file, ligand_file=None, nsteps=1000, **kwargs):
     run_forcefield_parameterization.main(config)
     run_energy_minimization.main(config)
     run_simulation.main(config)
+
+    if config["mmpbsa"]:
+        run_mmpbsa.export_prmtop(config)
+        run_mmpbsa.main(config)
+
+    if config["export_prmtop"]:
+        run_mmpbsa.export_prmtop(config)
+

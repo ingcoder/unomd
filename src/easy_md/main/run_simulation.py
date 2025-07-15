@@ -171,10 +171,8 @@ def main(
 
     logger.info("Files saved to:")
     logger.info(f"OpenMM DCD Trajectory file: {path_md_image}")
-    logger.info(
-        f"OpenMM Checkpoint file: {next_free_state(config['path_md_checkpoint'])}"
-    )
-    logger.info(f"OpenMM Log file: {next_free_state(config['path_md_log'])}")
+    logger.info(f"OpenMM Checkpoint file: {path_md_checkpoint}")
+    logger.info(f"OpenMM Log file: {path_md_log}")
 
 
 # --------------------------------------------------------------------------

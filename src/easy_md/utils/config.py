@@ -24,7 +24,13 @@ DEFAULT_CONFIG = {
     "path_rmsd_output": "",  # Will be set in create_config
     "path_rmsd_ligand_output": "",  # Will be set in create_config
     "path_rmsf_output": "",  # Will be set in create_config
-    "path_amber_topology": "",  # Will be set in create_config
+    "path_amber_solvated": "",  # Will be set in create_config
+    "path_amber_receptor": "",  # Will be set in create_config
+    "path_amber_ligand": "",  # Will be set in create_config
+    "path_amber_complex": "",  # Will be set in create_config
+    "path_mmpbsa_in": "",  # Will be set in create_config
+    "path_mmpbsa_results": "",  # Will be set in create_config
+
     
     # Forcefields
     "ff_small_molecule_openff": "openff-2.0.0.offxml",
@@ -77,7 +83,13 @@ DEFAULT_CONFIG = {
     "emin_heating_step": 300,
     "emin_target_temp": 300,
     "emin_heating_interval": 1,
-    "emin_steps": 10
+    "emin_steps": 10,
+
+    # MMPBSA
+    "mmpbsa": False,
+
+    # Amber Files
+    "export_prmtop": True,
 }
 
 def create_config(
@@ -86,6 +98,12 @@ def create_config(
     project_dir: str = None,
     output_dir: str = None,
     config_dir: str = None,
+    md_dir: str = None,
+    mmpbsa_dir: str = None,
+    amber_dir: str = None,
+    analysis_dir: str = None,
+    prep_dir: str = None,
+    emin_dir: str = None,
     save_config_as: str = "simulation_config.yaml",
     **params
 ) -> Dict[str, Any]:
@@ -172,13 +190,22 @@ def create_config(
 
     protein_file = Path(protein_file).absolute()
     project_dir = Path(project_dir).absolute() if project_dir else Path(protein_file).parent.absolute()
+    project_root = Path(__file__).parent.parent.parent.parent.absolute()
+    log_dir = project_root / "logs"
+    
     
     if ligand_file:
         ligand_file = Path(ligand_file).absolute()
     
     # Set up directories
-    output_dir = Path(output_dir).absolute() if output_dir else project_dir / "output"
     config_dir = Path(config_dir).absolute() if config_dir else project_dir / "config"
+    output_dir = Path(output_dir).absolute() if output_dir else project_dir / "output"
+    md_dir = Path(md_dir).absolute() if md_dir else project_dir / "output/md"
+    mmpbsa_dir = Path(mmpbsa_dir).absolute() if mmpbsa_dir else project_dir / "output/mmpbsa"
+    amber_dir = Path(amber_dir).absolute() if amber_dir else project_dir / "output/amber"
+    analysis_dir = Path(analysis_dir).absolute() if analysis_dir else project_dir / "output/analysis"
+    prep_dir = Path(prep_dir).absolute() if prep_dir else project_dir / "output/prep"
+    emin_dir = Path(emin_dir).absolute() if emin_dir else project_dir / "output/emin"
     
     # Validate paths
     if not protein_file.exists():
@@ -189,6 +216,13 @@ def create_config(
     # Create directories
     os.makedirs(output_dir, exist_ok=True)
     os.makedirs(config_dir, exist_ok=True)
+    os.makedirs(md_dir, exist_ok=True)
+    os.makedirs(mmpbsa_dir, exist_ok=True)
+    os.makedirs(amber_dir, exist_ok=True)
+    os.makedirs(log_dir, exist_ok=True)
+    os.makedirs(prep_dir, exist_ok=True)
+    os.makedirs(emin_dir, exist_ok=True)
+    os.makedirs(analysis_dir, exist_ok=True)
 
     # Start with default configuration
     config = DEFAULT_CONFIG.copy()
@@ -205,22 +239,27 @@ def create_config(
         "path_base": str(project_dir),
         "path_protein": str(protein_file),
         "path_ligand": str(ligand_file) if ligand_file else "",
-        "path_protein_solvated": str(output_dir / "protein_solvated.pdb"),
-        "path_openff_topology": str(output_dir / "openff_topology.json"),
-        "path_openff_interchange": str(output_dir / "openff_interchange.pdb"),
-        "path_openmm_topology": str(output_dir / "openmm_topology.pkl"),
-        "path_openmm_system": str(output_dir / "openmm_system.xml"),
-        "path_emin_structure": str(output_dir / "emin.pdb"),
-        "path_emin_state": str(output_dir / "emin.xml"),
-        "path_md_log": str(output_dir / "md_id.log"),
-        "path_md_trajectory": str(output_dir / "md_trajetory_id.dcd"),
-        "path_md_checkpoint": str(output_dir / "md_checkpoint_id.chk"),
-        "path_md_state": str(output_dir / "md_state_id.xml"),
-        "path_md_image": str(output_dir / "md_image_id.dcd"),
-        "path_rmsd_output": str(output_dir / "rmsd.pkl"),
-        "path_rmsd_ligand_output": str(output_dir / "rmsd_ligand.pkl"),
-        "path_rmsf_output": str(output_dir / "rmsf.log"),
-        "path_amber_topology": str(output_dir / "amber_top.prmtop")
+        "path_protein_solvated": str(prep_dir/ "system_solvated.pdb"),
+        "path_openff_topology": str(prep_dir / "openff_topology.json"),
+        "path_openff_interchange": str(prep_dir / "openff_interchange.pdb"),
+        "path_openmm_topology": str(prep_dir / "openmm_topology.pkl"),
+        "path_openmm_system": str(prep_dir / "openmm_system.xml"),
+        "path_emin_structure": str(emin_dir / "emin.pdb"),
+        "path_emin_state": str(emin_dir / "emin.xml"),
+        "path_md_log": str(md_dir / "md_id_0.log"),
+        "path_md_trajectory": str(md_dir / "md_temp_trajetory_id_0.dcd"),
+        "path_md_checkpoint": str(md_dir / "md_checkpoint_id_0.chk"),
+        "path_md_state": str(md_dir / "md_state_id_0.xml"),
+        "path_md_image": str(md_dir / "final_md_trajectory_id_0.dcd"),
+        "path_rmsd_output": str(analysis_dir / "analysis_rmsd.pkl"),
+        "path_rmsd_ligand_output": str(analysis_dir / "analysis_rmsd_ligand.pkl"),
+        "path_rmsf_output": str(analysis_dir / "analysis_rmsf.log"),
+        "path_amber_solvated": str(amber_dir / "amber_complex_solvated.prmtop"),
+        "path_amber_receptor": str(amber_dir / "amber_receptor.prmtop"),
+        "path_amber_ligand": str(amber_dir / "amber_ligand.prmtop"),
+        "path_amber_complex": str(amber_dir / "amber_complex.prmtop"),
+        "path_mmpbsa_in": str(mmpbsa_dir / "mmpbsa.in"),
+        "path_mmpbsa_results": str(mmpbsa_dir / "FINAL_RESULTS_MMPBSA.dat")
     })
 
     # Save configuration

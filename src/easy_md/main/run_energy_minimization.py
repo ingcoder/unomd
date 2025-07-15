@@ -27,6 +27,7 @@ logger = logging.getLogger(__name__)
 # Helper Functions
 # --------------------------------------------------------------------------
 
+
 def energy_force_post_simulation(simulation):
     """Calculates and prints the potential energy and top 10 force magnitudes after simulation."""
     potential_energy = simulation.context.getState(getEnergy=True).getPotentialEnergy()
@@ -61,6 +62,7 @@ def save_min_structure(simulation, emin_pdb_output, emin_xml_output):
 # --------------------------------------------------------------------------
 # Main Simulation Setup
 # --------------------------------------------------------------------------
+
 
 @time_tracker
 def main(config):
