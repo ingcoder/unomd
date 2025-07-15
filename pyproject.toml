@@ -20,10 +20,8 @@ classifiers = [
 ]
 dependencies = [
     "openmm>=7.7.0",
-    "openff-toolkit>=0.11.0",
     "mdanalysis>=2.4.0",
     "mdtraj>=1.9.7",
-    "pytraj>=2.0.6",
     "numpy>=1.23.5",
     "scipy>=1.9.3",
     "pandas>=1.5.3",
@@ -54,9 +52,6 @@ Repository = ""  # Add your repository URL here
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/easy_md"]
-
-[project.scripts]
-easy-md = "easy_md.cli:main"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
