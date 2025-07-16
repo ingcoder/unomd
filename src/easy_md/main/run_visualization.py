@@ -12,11 +12,11 @@ def run_analysis(config):
     warnings.filterwarnings('ignore', category=UserWarning, module='MDAnalysis')
     warnings.filterwarnings('ignore', category=DeprecationWarning, module='MDAnalysis.coordinates.DCD')
 
-    path_base = "/content/easy-md/example"
-    output_dir = f"{path_base}/output/analysis"
+    path_base = config.get("path_md_image")
+    output_dir = config.get("analysis_dir")
 
-    emin_structure = f"{output_dir}/emin.pdb"
-    md_trajectory = f"{output_dir}/md_image_id_0.dcd"
+    emin_structure = os.path.join(output_dir, "emin.pdb")
+    md_trajectory = os.path.join(output_dir, "md_image_id_0.dcd")
 
     if not os.path.exists(emin_structure) or not os.path.exists(md_trajectory):
         print("❌ MD simulation files not found. Please run the quickrun() command first.")
@@ -42,7 +42,7 @@ def run_analysis(config):
         print("\n=== 3D Trajectory Animation ===")
         view.show()
 
-        html_output_path = f"{output_dir}/trajectory_animation_3D.html"
+        html_output_path = os.path.join(output_dir, "trajectory_animation_3D.html")
         html = view._make_html()
         with open(html_output_path, 'w') as f:
             f.write(html)
