@@ -64,7 +64,7 @@ def quickrun(protein_file, ligand_file=None, nsteps=1000, **kwargs):
     )
     logger.info("EasyMD version: 0.1.0")
     logger.info("EasyMD repository: https://github.com/ingridbf/EasyMD")
-    logger.info("👩‍💻 Author: Ingrid Barbosa-Farias")
+    logger.info("👩‍💻 Authors: Ingrid Barbosa-Farias, Omar Arias-Gaguancela")
     logger.info("=" * 80)
     run_solvation.add_water(config=config)
     run_forcefield_parameterization.main(config)
