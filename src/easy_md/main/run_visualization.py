@@ -7,7 +7,6 @@ import MDAnalysis as mda
 import warnings
 import os
 
-
 def run_analysis(config):
 
     warnings.filterwarnings('ignore', message="Found no information for attr: 'formalcharges'")
