@@ -13,8 +13,11 @@ def run_analysis(config):
 
     warnings.filterwarnings('ignore')
 
-    path_base = "/content/easy-md/example"
-    output_dir = "/content/easy-md/src/utils"
+    path_base = config.get("path_md_image")
+    
+
+    output_dir = config.get("analysis_dir")
+
 
     os.makedirs(output_dir, exist_ok=True)
 
