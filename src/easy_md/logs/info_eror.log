@@ -89,3 +89,16 @@
 2025-07-16 13:45:26 - INFO - [openff.toolkit.typing.engines.smirnoff.parameters:2903] - Successfully up-converted vdW section from 0.3 to 0.4. `method="cutoff"` is now split into `periodic_method="cutoff"` and `nonperiodic_method="no-cutoff"`.
 2025-07-16 13:45:28 - INFO - [openff.toolkit.typing.engines.smirnoff.parameters:3094] - Attempting to up-convert Electrostatics section from 0.3 to 0.4
 2025-07-16 13:45:28 - INFO - [openff.toolkit.typing.engines.smirnoff.parameters:3104] - Successfully up-converted Electrostatics section from 0.3 to 0.4. `method="PME"` is now split into `periodic_potential="Ewald3D-ConductingBoundary"`, `nonperiodic_potential="Coulomb"`, and `exception_potential="Coulomb"`.
+2025-07-16 13:55:56 - INFO - [easy_md.main.run_mmpbsa:228] - ✅ Successfully converted OpenFF topology to AMBER topology: /home/omarpag1991/easy-md/example/output/amber/amber_complex_solvated.prmtop
+2025-07-16 13:55:59 - INFO - [easy_md.main.run_mmpbsa:129] - Validating AMBER topology file...
+2025-07-16 13:56:21 - INFO - [easy_md.main.run_mmpbsa:134] - Residues in AMBER structure: {'HOH', 'ALA', 'HIS', 'LYS', 'CYS', 'ILE', 'GLU', 'UNK', 'GLY', 'PHE', 'MET', 'THR', 'PRO', 'NA', 'LEU', 'ASP', 'ARG', 'ASN', 'SER', 'TYR', 'GLN', 'CL', 'TRP', 'VAL'}
+2025-07-16 13:56:21 - INFO - [easy_md.main.run_mmpbsa:77] - Residue counts: {'water': 13737, 'sodium': 37, 'chloride': 44, 'ligand': 1}
+2025-07-16 13:56:21 - INFO - [easy_md.main.run_mmpbsa:138] - Number of water molecules: 13737
+2025-07-16 13:56:21 - INFO - [easy_md.main.run_mmpbsa:139] - Number of sodium ions: 37
+2025-07-16 13:56:21 - INFO - [easy_md.main.run_mmpbsa:140] - Number of chloride ions: 44
+2025-07-16 13:56:21 - INFO - [easy_md.main.run_mmpbsa:141] - Number of ligands: 1
+2025-07-16 13:56:21 - INFO - [easy_md.main.run_mmpbsa:144] - Checking for multiple molecules:
+2025-07-16 13:56:21 - INFO - [easy_md.main.run_mmpbsa:101] - Number of seperate molecules: 13820
+2025-07-16 13:56:21 - INFO - [easy_md.main.run_mmpbsa:146] - Found 13820 separate molecules
+2025-07-16 13:56:21 - INFO - [easy_md.main.run_mmpbsa:124] - Problematic bonds: []
+2025-07-16 13:56:21 - INFO - [easy_md.main.run_mmpbsa:163] - ✅ Successfully validated AMBER topology file
