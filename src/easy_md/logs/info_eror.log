@@ -1,0 +1,91 @@
+2025-07-16 13:18:32 - INFO - [easy_md.main.quickrun:60] - ================================================================================
+2025-07-16 13:18:32 - INFO - [easy_md.main.quickrun:61] - 🚀 Starting EasyMD quickrun simulation pipeline...
+2025-07-16 13:18:32 - INFO - [easy_md.main.quickrun:62] - EasyMD is an open-source python tool for running molecular dynamics simulations of proteins and small molecules in single line of code.
+2025-07-16 13:18:32 - INFO - [easy_md.main.quickrun:65] - EasyMD version: 0.1.0
+2025-07-16 13:18:32 - INFO - [easy_md.main.quickrun:66] - EasyMD repository: https://github.com/ingridbf/EasyMD
+2025-07-16 13:18:32 - INFO - [easy_md.main.quickrun:67] - 👩‍💻 Author: Ingrid Barbosa-Farias
+2025-07-16 13:18:32 - INFO - [easy_md.main.quickrun:68] - ================================================================================
+2025-07-16 13:18:32 - INFO - [easy_md.main.run_solvation:44] - ========================================================
+2025-07-16 13:18:32 - INFO - [easy_md.main.run_solvation:45] - 💧 Solvation
+2025-07-16 13:18:32 - INFO - [easy_md.main.run_solvation:46] - ========================================================
+2025-07-16 13:18:32 - INFO - [easy_md.main.run_solvation:48] - Loading PDB file & adding missing hydrogens...
+2025-07-16 13:18:32 - INFO - [easy_md.main.run_solvation:55] - Found 18 missing heavy atoms - adding them now...
+2025-07-16 13:18:34 - INFO - [easy_md.main.run_solvation:57] - Adding missing hydrogens...
+2025-07-16 13:18:36 - INFO - [easy_md.main.run_solvation:85] - Water Box Dimensions (nanometers):
+2025-07-16 13:18:36 - INFO - [easy_md.main.run_solvation:86] - Width (X-axis): 9.079414313342733
+2025-07-16 13:18:36 - INFO - [easy_md.main.run_solvation:87] - Height (Y-axis): 6.669187870761159
+2025-07-16 13:18:36 - INFO - [easy_md.main.run_solvation:88] - Depth (Z-axis): 7.7007643838203945
+2025-07-16 13:18:36 - INFO - [easy_md.main.run_solvation:96] - Adding water, Na+, Cl- ions...
+2025-07-16 13:18:47 - INFO - [easy_md.main.run_solvation:112] - ✅ Saved solvated structure to: /home/omarpag1991/easy-md/example/output/prep/system_solvated.pdb
+2025-07-16 13:18:48 - INFO - [easy_md.utils.fileparser:40] - ⏰ Function 'add_water' took 15.5645 seconds to execute
+2025-07-16 13:18:48 - INFO - [easy_md.main.run_forcefield_parameterization:324] - ========================================================
+2025-07-16 13:18:48 - INFO - [easy_md.main.run_forcefield_parameterization:325] - 🛠️ Forcefield Parameterization
+2025-07-16 13:18:48 - INFO - [easy_md.main.run_forcefield_parameterization:326] - ========================================================
+2025-07-16 13:21:01 - INFO - [easy_md.main.run_forcefield_parameterization:258] - Creating OpenFF Topology For Solvated System...
+2025-07-16 13:21:04 - INFO - [easy_md.main.run_forcefield_parameterization:295] - Removed [H][O][H] molecule
+2025-07-16 13:21:05 - INFO - [easy_md.main.run_forcefield_parameterization:295] - Removed [H][O][H] molecule
+2025-07-16 13:21:05 - INFO - [easy_md.main.run_forcefield_parameterization:295] - Removed [H][O][H] molecule
+2025-07-16 13:21:05 - INFO - [easy_md.main.run_forcefield_parameterization:295] - Removed [H][O][H] molecule
+2025-07-16 13:21:05 - INFO - [easy_md.main.run_forcefield_parameterization:295] - Removed [H][O][H] molecule
+2025-07-16 13:21:08 - INFO - [easy_md.main.run_forcefield_parameterization:295] - Removed [H][O][H] molecule
+2025-07-16 13:21:08 - INFO - [easy_md.main.run_forcefield_parameterization:295] - Removed [H][O][H] molecule
+2025-07-16 13:21:22 - INFO - [easy_md.main.run_forcefield_parameterization:41] - Found a large molecule with 2770 atoms, which might be a protein or polymer.
+2025-07-16 13:21:39 - INFO - [easy_md.main.run_forcefield_parameterization:308] - OpenFF Topology File saved to /home/omarpag1991/easy-md/example/output/prep/openff_topology.json. File includes protein and ligand.
+2025-07-16 13:21:39 - INFO - [easy_md.utils.fileparser:40] - ⏰ Function 'create_openff_topology' took 38.6993 seconds to execute
+2025-07-16 13:21:39 - INFO - [easy_md.main.run_forcefield_parameterization:222] - Parameterizing OpenFF System...
+2025-07-16 13:22:33 - INFO - [openff.toolkit.typing.engines.smirnoff.parameters:2894] - Attempting to up-convert vdW section from 0.3 to 0.4
+2025-07-16 13:22:33 - INFO - [openff.toolkit.typing.engines.smirnoff.parameters:2903] - Successfully up-converted vdW section from 0.3 to 0.4. `method="cutoff"` is now split into `periodic_method="cutoff"` and `nonperiodic_method="no-cutoff"`.
+2025-07-16 13:22:35 - INFO - [openff.toolkit.typing.engines.smirnoff.parameters:3094] - Attempting to up-convert Electrostatics section from 0.3 to 0.4
+2025-07-16 13:22:35 - INFO - [openff.toolkit.typing.engines.smirnoff.parameters:3104] - Successfully up-converted Electrostatics section from 0.3 to 0.4. `method="PME"` is now split into `periodic_potential="Ewald3D-ConductingBoundary"`, `nonperiodic_potential="Coulomb"`, and `exception_potential="Coulomb"`.
+2025-07-16 13:27:51 - INFO - [easy_md.main.run_forcefield_parameterization:234] - ✅ Forcefield parameterization complete. OpenFF interchange saved to: /home/omarpag1991/easy-md/example/output/prep/openff_topology.json
+2025-07-16 13:27:51 - INFO - [easy_md.utils.fileparser:40] - ⏰ Function 'parameterize_openff_system' took 371.3444 seconds to execute
+2025-07-16 13:27:51 - INFO - [easy_md.main.run_forcefield_parameterization:181] - Creating OpenMM System and Topology Files...
+2025-07-16 13:30:14 - INFO - [easy_md.main.run_forcefield_parameterization:91] - System Consistency Check:
+2025-07-16 13:30:14 - INFO - [easy_md.main.run_forcefield_parameterization:92] - Number of particles in Interchange: 44095
+2025-07-16 13:30:14 - INFO - [easy_md.main.run_forcefield_parameterization:93] - Number of particles in OpenMM System: 44095
+2025-07-16 13:30:14 - INFO - [easy_md.main.run_forcefield_parameterization:94] - Number of particles in OpenMM Topology: 44095
+2025-07-16 13:30:14 - INFO - [easy_md.main.run_forcefield_parameterization:162] - ✅ Particle count is consistent across all representations
+2025-07-16 13:30:14 - INFO - [easy_md.main.run_forcefield_parameterization:202] - ✅ OpenMM System and Topology Files created successfully
+2025-07-16 13:30:14 - INFO - [easy_md.main.run_forcefield_parameterization:203] - OpenFF Interchange: /home/omarpag1991/easy-md/example/output/prep/openff_interchange.pdb
+2025-07-16 13:30:14 - INFO - [easy_md.main.run_forcefield_parameterization:204] - OpenMM Topology: /home/omarpag1991/easy-md/example/output/prep/openmm_topology.pkl
+2025-07-16 13:30:14 - INFO - [easy_md.main.run_forcefield_parameterization:205] - OpenMM System: /home/omarpag1991/easy-md/example/output/prep/openmm_system.xml
+2025-07-16 13:30:14 - INFO - [easy_md.utils.fileparser:40] - ⏰ Function 'save_openmm_system_topology' took 143.4592 seconds to execute
+2025-07-16 13:30:15 - INFO - [easy_md.utils.fileparser:40] - ⏰ Function 'main' took 687.3332 seconds to execute
+2025-07-16 13:30:15 - INFO - [easy_md.main.run_energy_minimization:69] - ========================================================
+2025-07-16 13:30:15 - INFO - [easy_md.main.run_energy_minimization:70] - ⬇️ Energy Minimization
+2025-07-16 13:30:15 - INFO - [easy_md.main.run_energy_minimization:71] - ========================================================
+2025-07-16 13:30:34 - INFO - [easy_md.utils.simulation_util:86] - Platform being used: CPU
+2025-07-16 13:30:34 - INFO - [easy_md.main.run_energy_minimization:93] - Starting Energy Minimization...
+2025-07-16 13:37:23 - INFO - [easy_md.main.run_energy_minimization:49] - Initial minimized state has energy -743286.39 kJ/mol with maximum force 2415.26 kJ/(mol nm)
+2025-07-16 13:37:23 - INFO - [easy_md.main.run_energy_minimization:99] - Gradual Heating Process...
+2025-07-16 13:37:25 - INFO - [easy_md.main.run_energy_minimization:49] - Heating at 0K has energy -743283.41 kJ/mol with maximum force 2412.04 kJ/(mol nm)
+2025-07-16 13:37:27 - INFO - [easy_md.main.run_energy_minimization:49] - Heating at 300K has energy -738854.3 kJ/mol with maximum force 2939.06 kJ/(mol nm)
+2025-07-16 13:37:27 - INFO - [easy_md.main.run_energy_minimization:107] - Final Equilibration at 300K...
+2025-07-16 13:37:30 - INFO - [easy_md.main.run_energy_minimization:111] - Final Energy Minimization...
+2025-07-16 13:38:57 - INFO - [easy_md.main.run_energy_minimization:49] - Final minimized state has energy -743760.41 kJ/mol with maximum force 2449.81 kJ/(mol nm)
+2025-07-16 13:38:58 - INFO - [easy_md.main.run_energy_minimization:120] - ✅ Energy Minimization and Equilibration Complete! File saved to: /home/omarpag1991/easy-md/example/output/emin/emin.pdb
+2025-07-16 13:38:58 - INFO - [easy_md.utils.fileparser:40] - ⏰ Function 'main' took 523.6555 seconds to execute
+2025-07-16 13:38:58 - INFO - [easy_md.main.run_simulation:89] - ========================================================
+2025-07-16 13:38:58 - INFO - [easy_md.main.run_simulation:90] - 🔄 MD Simulation
+2025-07-16 13:38:58 - INFO - [easy_md.main.run_simulation:91] - ========================================================
+2025-07-16 13:39:02 - INFO - [easy_md.utils.simulation_util:86] - Platform being used: CPU
+2025-07-16 13:39:02 - INFO - [easy_md.main.run_simulation:134] - No starting state or checkpoint provided. Using /home/omarpag1991/easy-md/example/output/emin/emin.xml
+2025-07-16 13:39:03 - INFO - [easy_md.utils.simulation_util:178] - Successfully loaded state from /home/omarpag1991/easy-md/example/output/emin/emin.xml
+2025-07-16 13:39:03 - INFO - [easy_md.main.run_simulation:73] - Starting Simulation...
+2025-07-16 13:43:31 - INFO - [easy_md.main.run_simulation:75] - ✅ Simulation Complete!
+2025-07-16 13:43:31 - INFO - [easy_md.utils.fileparser:40] - ⏰ Function 'run_simulation' took 268.4152 seconds to execute
+2025-07-16 13:43:31 - INFO - [easy_md.main.run_simulation:166] - Saving state and image...
+2025-07-16 13:43:43 - INFO - [easy_md.main.run_simulation:172] - Files saved to:
+2025-07-16 13:43:43 - INFO - [easy_md.main.run_simulation:173] - OpenMM DCD Trajectory file: /home/omarpag1991/easy-md/example/output/md/final_md_trajectory_id_1.dcd
+2025-07-16 13:43:43 - INFO - [easy_md.main.run_simulation:174] - OpenMM Checkpoint file: /home/omarpag1991/easy-md/example/output/md/md_checkpoint_id_1.chk
+2025-07-16 13:43:43 - INFO - [easy_md.main.run_simulation:175] - OpenMM Log file: /home/omarpag1991/easy-md/example/output/md/md_id_1.log
+2025-07-16 13:43:43 - INFO - [easy_md.main.run_mmpbsa:195] - Converting OpenFF topology to AMBER topology...
+2025-07-16 13:44:53 - INFO - [easy_md.main.run_mmpbsa:209] - ✅ Found ligand in topology (molecule under 100 atoms)
+2025-07-16 13:44:55 - INFO - [openff.toolkit.typing.engines.smirnoff.parameters:2894] - Attempting to up-convert vdW section from 0.3 to 0.4
+2025-07-16 13:44:55 - INFO - [openff.toolkit.typing.engines.smirnoff.parameters:2903] - Successfully up-converted vdW section from 0.3 to 0.4. `method="cutoff"` is now split into `periodic_method="cutoff"` and `nonperiodic_method="no-cutoff"`.
+2025-07-16 13:44:55 - INFO - [openff.toolkit.typing.engines.smirnoff.parameters:3094] - Attempting to up-convert Electrostatics section from 0.3 to 0.4
+2025-07-16 13:44:55 - INFO - [openff.toolkit.typing.engines.smirnoff.parameters:3104] - Successfully up-converted Electrostatics section from 0.3 to 0.4. `method="PME"` is now split into `periodic_potential="Ewald3D-ConductingBoundary"`, `nonperiodic_potential="Coulomb"`, and `exception_potential="Coulomb"`.
+2025-07-16 13:45:26 - INFO - [openff.toolkit.typing.engines.smirnoff.parameters:2894] - Attempting to up-convert vdW section from 0.3 to 0.4
+2025-07-16 13:45:26 - INFO - [openff.toolkit.typing.engines.smirnoff.parameters:2903] - Successfully up-converted vdW section from 0.3 to 0.4. `method="cutoff"` is now split into `periodic_method="cutoff"` and `nonperiodic_method="no-cutoff"`.
+2025-07-16 13:45:28 - INFO - [openff.toolkit.typing.engines.smirnoff.parameters:3094] - Attempting to up-convert Electrostatics section from 0.3 to 0.4
+2025-07-16 13:45:28 - INFO - [openff.toolkit.typing.engines.smirnoff.parameters:3104] - Successfully up-converted Electrostatics section from 0.3 to 0.4. `method="PME"` is now split into `periodic_potential="Ewald3D-ConductingBoundary"`, `nonperiodic_potential="Coulomb"`, and `exception_potential="Coulomb"`.

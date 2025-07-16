@@ -1,4 +1,4 @@
-name: easymd
+name: easymd2
 channels:
   - conda-forge
   - defaults
