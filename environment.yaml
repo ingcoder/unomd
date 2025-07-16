@@ -4,19 +4,24 @@ channels:
   - defaults
 
 dependencies:
-  # Core MD packages
+  # Core packages
   - python=3.9
   - openmm=8.0.0
   - pdbfixer
   - mdanalysis
-  - openff-toolkit
-  
-  # Analysis and visualization
   - pandas
   - matplotlib
-  
+  - numpy
+  - scipy
+  - tqdm
+  - pyyaml
+  - h5py
+  - jupyter
+  - notebook
+
   # Python packages to be installed with pip
   - pip
   - pip:
-    - notebook
-    - rdkit
+      - rdkit
+# NOTE: ambertools and openff-toolkit need to be installed manually
+# See DOCKER_README.md for instructions

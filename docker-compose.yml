@@ -1,0 +1,54 @@
+version: "3.8"
+
+services:
+  easy-md:
+    build: .
+    container_name: easy-md
+    volumes:
+      # Mount input files
+      - ./example:/app/inputs:ro
+      # Mount output directory
+      - ./outputs:/app/outputs
+      # Mount logs directory
+      - ./logs:/app/logs
+    environment:
+      - PYTHONUNBUFFERED=1
+    # Override command to keep container running for interactive use
+    command: ["tail", "-f", "/dev/null"]
+
+  # Configuration for GPU usage (requires nvidia-docker)
+  easy-md-gpu:
+    build: .
+    container_name: easy-md-gpu
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./example:/app/inputs:ro
+      - ./outputs:/app/outputs
+      - ./logs:/app/logs
+    command: ["tail", "-f", "/dev/null"]
+
+  # Jupyter notebook service for interactive development
+  easy-md-jupyter:
+    build: .
+    container_name: easy-md-jupyter
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./example:/app/inputs:ro
+      - ./outputs:/app/outputs
+      - ./logs:/app/logs
+      - ./notebooks:/app/notebooks
+    environment:
+      - PYTHONUNBUFFERED=1
+    command: >
+      bash -c "conda run -n easymd jupyter notebook 
+      --ip=0.0.0.0 
+      --port=8888 
+      --no-browser 
+      --allow-root 
+      --NotebookApp.token='' 
+      --NotebookApp.password='' 
+      --notebook-dir=/app"

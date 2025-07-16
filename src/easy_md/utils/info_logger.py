@@ -9,10 +9,16 @@ appropriate formatting and level configuration.
 import logging
 from logging.handlers import RotatingFileHandler
 import os
+from pathlib import Path
 
 # Define log file path
-app_dir = os.path.dirname(os.path.dirname(__file__))  # Go up from utils/ to easy_md/
-log_file_path = os.path.join(app_dir, 'logs/info_eror.log')
+current_file = Path(__file__)
+project_root = current_file.parent.parent.parent.parent  # Go up from utils/easy_md/src/easy-md/
+logs_dir = project_root / 'logs'
+log_file_path = logs_dir / 'info_eror.log'
+
+# Create logs directory if it doesn't exist
+os.makedirs(logs_dir, exist_ok=True)
 
 # Create rotating file handler
 rotating_handler = RotatingFileHandler(

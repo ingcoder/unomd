@@ -6,3 +6,7 @@ example/.DS_Store
 example/output/
 src/easy_md/utils/__pycache__/
 easy-md/logs/
+
+# Docker-related directories
+outputs/
+logs/
