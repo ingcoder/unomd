@@ -5,6 +5,22 @@ import py3Dmol
 import MDAnalysis as mda
 import warnings
 import os
+import glob
+import logging
+
+logger = logging.getLogger(__name__)
+
+def get_last_final_dcd(config):
+    """Getting the last final dcd file."""
+    try:
+        trajectory_dir = os.path.dirname(config["path_md_image"])
+        dcd_files = glob.glob(os.path.join(trajectory_dir, "final_md*.dcd"))
+        dcd_files.sort(key=os.path.getmtime)
+        logger.info(f"Last final dcd file: {dcd_files[-1]}")
+        return dcd_files[-1]
+    except Exception as e:
+        logger.error(f"Error getting last final dcd file: {e}")
+        raise 
 
 def run_analysis(config):
 
@@ -12,11 +28,10 @@ def run_analysis(config):
     warnings.filterwarnings('ignore', category=UserWarning, module='MDAnalysis')
     warnings.filterwarnings('ignore', category=DeprecationWarning, module='MDAnalysis.coordinates.DCD')
 
-    path_base = config.get("path_md_image")
     output_dir = config.get("analysis_dir")
 
-    emin_structure = os.path.join(output_dir, "emin.pdb")
-    md_trajectory = os.path.join(output_dir, "md_image_id_0.dcd")
+    emin_structure = config.get("path_emin_structure")
+    md_trajectory = get_last_final_dcd(config)
 
     if not os.path.exists(emin_structure) or not os.path.exists(md_trajectory):
         print("❌ MD simulation files not found. Please run the quickrun() command first.")
