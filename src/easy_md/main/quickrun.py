@@ -5,6 +5,7 @@ from easy_md.main import (
     run_energy_minimization,
     run_simulation,
     run_mmpbsa,
+    run_analysis,
 )
 from easy_md.utils.config import create_config
 from easy_md.utils import info_logger
@@ -70,6 +71,7 @@ def quickrun(protein_file, ligand_file=None, nsteps=1000, **kwargs):
     run_forcefield_parameterization.main(config)
     run_energy_minimization.main(config)
     run_simulation.main(config)
+    run_analysis.main(config)
 
     if config["mmpbsa"]:
         run_mmpbsa.export_prmtop(config)
@@ -77,4 +79,8 @@ def quickrun(protein_file, ligand_file=None, nsteps=1000, **kwargs):
 
     if config["export_prmtop"]:
         run_mmpbsa.export_prmtop(config)
+
+
+if __name__ == "__main__":
+    quickrun(protein_file="/Users/ingrid/Projects/EasyMD/easy-md/example/4w52_C_EPE.pdb", ligand_file="/Users/ingrid/Projects/EasyMD/easy-md/example/4w52_C_EPE.sdf", nsteps=1000)
 

@@ -168,18 +168,12 @@ def run_mmpbsa(config) -> None:
 # ------------------------------------------------------------------------------
 
 
-def main(config_filepath) -> None:
+def main(config) -> None:
     logger.info("========================================================")
     logger.info("🛠️ MM/PBSA Calculation")
     logger.info("========================================================")
 
-    if config_filepath is not None:
-        with open(config_filepath, "r") as f:
-            config = yaml.safe_load(f)
-    else:
-        logger.error("No config file provided. Please provide a config file.")
-        raise ValueError("No config file provided. Please provide a config file.")
-
+ 
     create_mmpbsa_input_file(config)
 
     try:
@@ -203,4 +197,11 @@ def main(config_filepath) -> None:
 
 if __name__ == "__main__":
     config_filepath = "/Users/ingrid/Projects/EasyMD/easy-md/example/config/simulation_config.yaml"
+    if config_filepath is not None:
+        with open(config_filepath, "r") as f:
+            config = yaml.safe_load(f)
+    else:
+        logger.error("No config file provided. Please provide a config file.")
+        raise ValueError("No config file provided. Please provide a config file.")
+
     main(config_filepath)
