@@ -1,7 +1,6 @@
-#@title **Visualize MD trajectory**
-
-!pip install py3Dmol -q
-!pip install MDAnalysis -q
+# Visualize MD trajectory
+# Required dependencies: py3Dmol, MDAnalysis
+# Install with: pip install py3Dmol MDAnalysis
 import py3Dmol
 import MDAnalysis as mda
 import warnings
