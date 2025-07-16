@@ -24,12 +24,18 @@ DEFAULT_CONFIG = {
     "path_rmsd_output": "",  # Will be set in create_config
     "path_rmsd_ligand_output": "",  # Will be set in create_config
     "path_rmsf_output": "",  # Will be set in create_config
+    "path_rmsd_output_text": "",  # Will be set in create_config
+    "path_rmsd_ligand_output_text": "",  # Will be set in create_config
+    "path_rmsf_output_text": "",  # Will be set in create_config
+    "path_rmsd_rmsf_html": "",  # Will be set in create_config
     "path_amber_solvated": "",  # Will be set in create_config
     "path_amber_receptor": "",  # Will be set in create_config
     "path_amber_ligand": "",  # Will be set in create_config
     "path_amber_complex": "",  # Will be set in create_config
     "path_mmpbsa_in": "",  # Will be set in create_config
     "path_mmpbsa_results": "",  # Will be set in create_config
+   
+
 
     
     # Forcefields
@@ -254,12 +260,16 @@ def create_config(
         "path_rmsd_output": str(analysis_dir / "analysis_rmsd.pkl"),
         "path_rmsd_ligand_output": str(analysis_dir / "analysis_rmsd_ligand.pkl"),
         "path_rmsf_output": str(analysis_dir / "analysis_rmsf.log"),
+        "path_rmsd_output_text": str(analysis_dir / "analysis_rmsd.txt"),
+        "path_rmsd_ligand_output_text": str(analysis_dir / "analysis_rmsd_ligand.txt"),
+        "path_rmsf_output_text": str(analysis_dir / "analysis_rmsf.txt"),
         "path_amber_solvated": str(amber_dir / "amber_complex_solvated.prmtop"),
         "path_amber_receptor": str(amber_dir / "amber_receptor.prmtop"),
         "path_amber_ligand": str(amber_dir / "amber_ligand.prmtop"),
         "path_amber_complex": str(amber_dir / "amber_complex.prmtop"),
         "path_mmpbsa_in": str(mmpbsa_dir / "mmpbsa.in"),
-        "path_mmpbsa_results": str(mmpbsa_dir / "FINAL_RESULTS_MMPBSA.dat")
+        "path_mmpbsa_results": str(mmpbsa_dir / "FINAL_RESULTS_MMPBSA.dat"),
+        "path_rmsd_rmsf_html": str(analysis_dir / "rmsd_rmsf_analysis.html")
     })
 
     # Save configuration
