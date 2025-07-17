@@ -1,6 +1,6 @@
-# Getting Started with EasyMD
+# Getting Started with UnoMD
 
-This tutorial will guide you through common use cases of EasyMD, from basic protein-ligand simulations to more advanced scenarios.
+This tutorial will guide you through common use cases of UnoMD, from basic protein-ligand simulations to more advanced scenarios.
 
 ## Basic Protein-Ligand Simulation
 
@@ -9,7 +9,7 @@ This tutorial will guide you through common use cases of EasyMD, from basic prot
 The simplest way to run a simulation is using the `quickrun` function:
 
 ```python
-from easy_md.main.quickrun import quickrun
+from unomd.main.quickrun import quickrun
 
 quickrun(
     protein_file="protein.pdb",
@@ -19,6 +19,7 @@ quickrun(
 ```
 
 This will automatically:
+
 1. Solvate your system
 2. Apply force field parameters
 3. Perform energy minimization
@@ -29,9 +30,9 @@ This will automatically:
 For more control over the process, you can run each step individually:
 
 ```python
-from easy_md.main import run_solvation, run_forcefield_parameterization
-from easy_md.main import run_energy_minimization, run_simulation
-from easy_md.utils.config import create_config
+from unomd.main import run_solvation, run_forcefield_parameterization
+from unomd.main import run_energy_minimization, run_simulation
+from unomd.utils.config import create_config
 
 # Create configuration
 config = create_config(
@@ -66,13 +67,13 @@ paths:
   solvated_protein: "protein_solvated.pdb"
 
 integrator:
-  temperature_kelvin: 310  # Body temperature
+  temperature_kelvin: 310 # Body temperature
   friction_coeff_ps: 1
   time_step_ps: 0.002
 
 equilibration:
-  total_steps: 5000000    # 10 ns
-  save_interval: 50000    # Save every 100 ps
+  total_steps: 5000000 # 10 ns
+  save_interval: 50000 # Save every 100 ps
   pressure_atm: 1.0
   barostat_freq: 25
 ```
@@ -81,27 +82,20 @@ Load and use the custom configuration:
 
 ```python
 import yaml
-from easy_md.utils.config import create_config
+from unomd.utils.config import create_config
 
 # Load custom settings
 with open("config.yaml") as f:
     custom_settings = yaml.safe_load(f)
 
 # Create config with custom settings
-config = create_config(
-    protein_file="protein.pdb",
-    ligand_file="ligand.sdf",
-    **custom_settings
-)
-
-# Run simulation with custom settings
-run_simulation.main(config)
+config = create_config(**custom_settings)
 ```
 
 ### 2. Continuing from a Checkpoint
 
 ```python
-from easy_md.main import run_simulation
+from unomd.main import run_simulation
 
 # Continue from a checkpoint
 run_simulation.main(
@@ -144,16 +138,19 @@ run_simulation.main(config)
 ## Tips and Best Practices
 
 1. **System Preparation**
+
    - Always check your input structures
    - Ensure proper protonation states
    - Remove any unwanted molecules/ions
 
 2. **Simulation Length**
+
    - Start with short test runs (1000 steps)
    - Increase length for production runs
    - Monitor energy and temperature convergence
 
 3. **File Management**
+
    - Use descriptive file names
    - Keep input files organized
    - Save checkpoints regularly
@@ -168,6 +165,7 @@ run_simulation.main(config)
 ### Common Issues
 
 1. **System Crashes**
+
    ```python
    # Reduce time step
    config = create_config(
@@ -177,6 +175,7 @@ run_simulation.main(config)
    ```
 
 2. **Energy Instability**
+
    ```python
    # Add more minimization steps
    run_energy_minimization.main(config, max_iterations=5000)
@@ -198,4 +197,4 @@ run_simulation.main(config)
 - Contact the developers with:
   - Your configuration file
   - Error messages
-  - System details 
+  - System details

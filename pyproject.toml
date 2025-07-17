@@ -3,14 +3,15 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "easy-md"
+name = "unomd"
 version = "0.1.0"
 description = "A package for molecular dynamics simulations"
 readme = "README.md"
 requires-python = ">=3.9"
 license = {file = "LICENSE"}
 authors = [
-    {name = "EasyMD Developer", email = "developer@example.com"},
+    {name = "Ingrid Barbosa-Farias", email = "ingrid@simatomic.com"},
+    {name = "Omar Arias Gaguancela", email = "omar.arias@example.com"},
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -19,16 +20,16 @@ classifiers = [
 ]
 dependencies = [
     "openmm>=7.7.0",
-    "openff-toolkit>=0.11.0",
     "mdanalysis>=2.4.0",
     "mdtraj>=1.9.7",
-    "pytraj>=2.0.6",
     "numpy>=1.23.5",
     "scipy>=1.9.3",
     "pandas>=1.5.3",
     "tqdm>=4.64.1",
     "pyyaml>=6.0",
     "h5py>=3.7.0",
+    "plotly>=5.18.0",
+    "py3dmol>=0.1.0"
 ]
 
 [project.optional-dependencies]
@@ -52,13 +53,10 @@ test = [
 Repository = ""  # Add your repository URL here
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/easy_md"]
-
-[project.scripts]
-easy-md = "easy_md.cli:main"
+packages = ["src/unomd"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
-addopts = "-v --cov=easy_md --cov-report=term-missing"
+addopts = "-v --cov=unomd --cov-report=term-missing"
 timeout = 300 

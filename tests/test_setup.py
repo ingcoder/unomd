@@ -16,7 +16,7 @@ def test_imports():
 
 def test_config_creation(tmp_path):
     """Test that configuration file can be created with basic settings."""
-    from easy_md.utils.config import create_config
+    from unomd.utils.config import create_config
     
     # Create a mock protein file
     protein_file = tmp_path / "test.pdb"
@@ -55,7 +55,7 @@ def test_config_creation(tmp_path):
 
 def test_directory_structure(tmp_path):
     """Test that the expected directory structure is created."""
-    from easy_md.utils.config import create_config
+    from unomd.utils.config import create_config
     
     # Create basic configuration
     protein_file = tmp_path / "test.pdb"
@@ -78,7 +78,7 @@ def test_directory_structure(tmp_path):
 
 def test_file_paths(tmp_path):
     """Test that file paths are correctly configured."""
-    from easy_md.utils.config import create_config
+    from unomd.utils.config import create_config
     
     # Create mock files
     protein_file = tmp_path / "test.pdb"

@@ -1,4 +1,4 @@
-name: easymd
+name: unomd
 channels:
   - conda-forge
   - defaults
@@ -10,13 +10,16 @@ dependencies:
   - pdbfixer
   - mdanalysis
   - openff-toolkit
-  
+  - ambertools
+
   # Analysis and visualization
   - pandas
   - matplotlib
-  
+
   # Python packages to be installed with pip
   - pip
   - pip:
-    - notebook
-    - rdkit
+      - notebook
+      - rdkit
+      - plotly
+      - py3dmol

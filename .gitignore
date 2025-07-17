@@ -1,0 +1,16 @@
+# .gitignore
+*/__pycache__/*
+*.pyc
+.DS_Store
+*.DS_Store
+example/.DS_Store
+example/output/
+example/config/
+src/unomd/utils/__pycache__/
+src/unomd/main/__pycache__/
+*.log
+*.frc
+_MMPBSA_*
+# Docker-related directories
+outputs/
+config/
