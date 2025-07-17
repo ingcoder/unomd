@@ -30,7 +30,7 @@ UnoMD is a Python package that simplifies molecular dynamics simulations, making
 
 ## Tutorial
 
-Follow our tutorial to learn how to use uno-md in quickrun mode.
+Follow our tutorial to learn how to use unomd in quickrun mode.
 [Run the interactive tutorial in Google Colab](https://colab.research.google.com/drive/1H7IQ7mrGBOpuUN4-5XS8Vh09pwK3PuwL?usp=sharing)
 
 ## Prerequisites
@@ -63,6 +63,25 @@ mamba activate unomd
 pip install -e .
 ```
 
+### Using Docker
+
+For a containerized environment with all dependencies pre-installed:
+
+```bash
+git clone https://github.com/ingcoder/unomd.git
+cd unomd
+docker build --platform=linux/amd64 -t unomd-image .
+docker run --rm -it unomd-image
+```
+
+Once inside the Docker container:
+
+```bash
+mamba activate unomd
+```
+
+You can then use UnoMD normally with the quickrun instructions below.
+
 ## Quick Start
 
 ```python
@@ -86,10 +105,6 @@ config = create_config(
     protein_file="path/to/protein.pdb",
     ligand_file="path/to/ligand.sdf",
 
-    # MD simulation settings. See "Simulation Paramters" section below for all options
-    md_steps=1000,
-    md_save_interval=10,
-
     # Platform settings
     platform_name="CPU",          # or CUDA
     platform_precision="mixed",   # or "single" or "double"
@@ -106,13 +121,6 @@ run_simulation.main(config, starting_state_path="path/to/state.xml")
 ## Simulation Parameters
 
 ```yaml
-# Energy Minimization Parameters
-emin_heating_interval: 1 # Interval for heating during minimization
-emin_heating_step: 300 # Heating step size
-emin_steps: 10 # Number of minimization steps
-emin_target_temp: 300 # Target temperature for minimization (K)
-emin_tolerance: 5 # Energy tolerance (kJ/mol/nm)
-
 # Force Field Parameters
 ff_protein: "amber14-all.xml" # Protein force field
 ff_protein_openff: "ff14sb_off_impropers_0.0.3.offxml" # OpenFF protein parameters
@@ -124,10 +132,18 @@ integrator_friction: 1.0 # Langevin integrator friction coefficient (1/ps)
 integrator_temperature: 300.0 # Simulation temperature (K)
 integrator_timestep: 0.002 # Integration timestep (ps)
 
+# Solvation Parameters
+solv_box_buffer: 2.5 # Solvent box padding (Å)
+solv_ionic_strength: 0.15 # Ionic strength (M)
+solv_model: "tip3p" # Water model (tip3p, spce, tip4pew, tip5p)
+solv_negative_ion: "Cl-" # Negative ion type (Cl-, Br-, F-, I-)
+solv_pH: 7.0 # System pH
+solv_positive_ion: "Na+" # Positive ion type (Cs+, K+, Li+, Na+, Rb+)
+
 # Molecular Dynamics Settings
 md_anisotropic: false # Use anisotropic barostat
 md_barostat_freq: 25 # Barostat update frequency
-md_harmonic_restraint: true # Apply harmonic restraints
+md_harmonic_restraint: false # Apply harmonic restraints
 md_load_state: true # Load from previous state if available
 md_npt: false # Run in NPT ensemble
 md_pressure: 1.0 # System pressure (atm)
@@ -135,18 +151,17 @@ md_restrained_residues: [] # List of residues to restrain
 md_save_interval: 10 # Trajectory save interval
 md_steps: 1000 # Number of MD steps
 
+# Energy Minimization Parameters
+emin_heating_interval: 1 # Steps per heating interval
+emin_heating_step: 300 # Heating step size
+emin_steps: 10 # Number of minimization steps
+emin_target_temp: 300 # Target temperature for minimization (K)
+emin_tolerance: "5 * kilojoule_per_mole / nanometer" # Energy tolerance
+
 # Monitoring Parameters
 monitor_energy_threshold: 100.0 # Energy monitoring threshold
 monitor_temp_threshold: 2.0 # Temperature monitoring threshold
 monitor_window: 10 # Monitoring window size
-
-# Solvation Parameters
-solv_box_buffer: 2.5 # Solvent box padding (Å)
-solv_ionic_strength: 0.15 # Ionic strength (M)
-solv_model: "tip3p" # Water model
-solv_negative_ion: "Cl-" # Negative ion type
-solv_pH: 7.0 # System pH
-solv_positive_ion: "Na+" # Positive ion type
 
 # Analysis Settings
 rmsd_ligand_selection: "resname UNK" # RMSD selection for ligand
@@ -155,20 +170,18 @@ rmsf_selection: "protein and name CA" # RMSF selection
 
 # MM/PBSA Settings
 mmpbsa: false # Enable MM/PBSA binding energy calculations
-export_prmtop: true # Export AMBER topology files (.prmtop format)
+export_prmtop: false # Export AMBER topology files (.prmtop format)
 
 # Platform Configuration
 platform_name: "CPU" # Computation platform (CUDA/CPU)
-platform_precision: "mixed" # Precision model
+platform_precision: "mixed" # Precision model (single/mixed/double)
 
 # Paths
 path_protein: path/to/protein.pdb # Required by user
 path_ligand: path/to/ligand.sdf # Required if you want to simulate protein-ligand interaction
 
 # Paths set automatically, unless provided by user
-
-path_base: path/to/project_dir # # Defaults to the parent directory containing the protein structure files
-
+path_base: path/to/project_dir # Defaults to the parent directory containing the protein structure files
 path_amber_complex: path_base/output/amber/amber_complex.prmtop
 path_amber_ligand: path_base/output/amber/amber_ligand.prmtop
 path_amber_receptor: path_base/output/amber/amber_receptor.prmtop
@@ -176,7 +189,7 @@ path_amber_solvated: path_base/output/amber/amber_complex_solvated.prmtop
 path_emin_state: path_base/output/emin/emin.xml
 path_emin_structure: path_base/output/emin/emin.pdb
 path_md_checkpoint: path_base/output/md/md_checkpoint_id_0.chk
-path_md_image: path_base/output/md/final_md_trajectory_id_0.dcd #! Final processed trajectory file with molecules re-centered in water box.
+path_md_image: path_base/output/md/final_md_trajectory_id_0.dcd # Final processed trajectory file with molecules re-centered in water box
 path_md_log: path_base/output/md/md_id_0.log
 path_md_state: path_base/output/md/md_state_id_0.xml
 path_md_trajectory: path_base/output/md/md_temp_trajetory_id_0.dcd
@@ -190,6 +203,8 @@ path_protein_solvated: path_base/output/prep/system_solvated.pdb
 path_rmsd_ligand_output: path_base/output/analysis/analysis_rmsd_ligand.pkl
 path_rmsd_output: path_base/output/analysis/analysis_rmsd.pkl
 path_rmsf_output: path_base/output/analysis/analysis_rmsf.log
+path_rmsd_rmsf_html: path_base/output/analysis/rmsd_rmsf_analysis.html
+path_molviewer_html: path_base/output/analysis/molecule_viewer.html
 ```
 
 ## Advanced Features
@@ -286,6 +301,8 @@ my_project/
 │       ├── mmpbsa.in
 │       └── FINAL_RESULTS_MMPBSA.dat
 └── logs/                     # Log files
+    └── info_error.log
+
 ```
 
 ## License
@@ -301,11 +318,11 @@ We welcome contributions! Please feel free to submit a Pull Request.
 If you use UnoMD in your research, please cite it as:
 
 ```bibtex
-@software{unomd2025,
+@software{unomd,
   author       = {Ingrid Barbosa-Farias and Omar Arias Gaguancela},
   title        = {UnoMD: A Python Package for Simplified Molecular Dynamics Simulations},
   year         = {2025},
   publisher    = {GitHub},
-  url          = {https://github.com/ingcoder/uno-md}
+  url          = {https://github.com/ingcoder/unomd}
 }
 ```

@@ -29,7 +29,7 @@ COPY src/ ./src/
 COPY README.md LICENSE ./
 
 # Create conda environment from environment.yaml using mamba
-RUN mamba env create -f environment.yaml && mamba clean -afy
+RUN mamba env create -f environment.yaml --yes --quiet && mamba clean -afy
 
 # Make RUN commands use the new environment
 SHELL ["conda", "run", "-n", "unomd", "/bin/bash", "-c"]
