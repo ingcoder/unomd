@@ -5,9 +5,9 @@
        width=70%>
 </p>
 
-# EasyMD
+# UnoMD
 
-EasyMD is a Python package that simplifies molecular dynamics simulations, making them accessible to both beginners and experts. It provides an automated, easy-to-use interface for running protein-ligand simulations using OpenMM as the backend.
+UnoMD is a Python package that simplifies molecular dynamics simulations, making them accessible to both beginners and experts. It provides an automated, easy-to-use interface for running protein-ligand simulations using OpenMM as the backend.
 
 ![Demo Gif](assets/demo.gif)
 
@@ -30,7 +30,7 @@ EasyMD is a Python package that simplifies molecular dynamics simulations, makin
 
 ## Tutorial
 
-Follow our tutorial to learn how to use easy-md in quickrun mode.
+Follow our tutorial to learn how to use uno-md in quickrun mode.
 [Run the interactive tutorial in Google Colab](https://colab.research.google.com/drive/1H7IQ7mrGBOpuUN4-5XS8Vh09pwK3PuwL?usp=sharing)
 
 ## Prerequisites
@@ -56,17 +56,17 @@ bash Mambaforge-$(uname)-$(uname -m).sh
 ### Using mamba (Recommended)
 
 ```bash
-git clone https://github.com/ingcoder/easy-md.git
-cd easy-md
+git clone https://github.com/ingcoder/unomd.git
+cd uno-md
 mamba env create -f environment.yaml
-mamba activate easymd
+mamba activate unomd
 pip install -e .
 ```
 
 ## Quick Start
 
 ```python
-from easy_md.main.quickrun import quickrun
+from unomd.main.quickrun import quickrun
 
 # Run a simple protein-ligand simulation
 quickrun(
@@ -79,8 +79,8 @@ quickrun(
 ## Step-by-Step Approach
 
 ```python
-from easy_md.utils.config import create_config
-from easy_md.main import run_solvation, run_forcefield_parameterization, run_energy_minimization, run_simulation
+from unomd.utils.config import create_config
+from unomd.main import run_solvation, run_forcefield_parameterization, run_energy_minimization, run_simulation
 
 config = create_config(
     protein_file="path/to/protein.pdb",
@@ -196,10 +196,10 @@ path_rmsf_output: path_base/output/analysis/analysis_rmsf.log
 
 ### MM/PBSA Binding Energy Analysis
 
-EasyMD includes built-in support for MM/PBSA (Molecular Mechanics/Poisson-Boltzmann Surface Area) calculations to estimate protein-ligand binding energies:
+UnoMD includes built-in support for MM/PBSA (Molecular Mechanics/Poisson-Boltzmann Surface Area) calculations to estimate protein-ligand binding energies:
 
 ```python
-from easy_md.main.quickrun import quickrun
+from unomd.main.quickrun import quickrun
 
 # Run simulation with MM/PBSA analysis
 quickrun(
@@ -220,7 +220,7 @@ quickrun(
 
 ### AMBER Format Export
 
-EasyMD can export simulation files to AMBER format for compatibility with AMBER tools:
+UnoMD can export simulation files to AMBER format for compatibility with AMBER tools:
 
 ```python
 config = create_config(
@@ -236,7 +236,7 @@ config = create_config(
 - Converts OpenMM/OpenFF molecular systems to AMBER format (.prmtop/.inpcrd)
 - Validates resulting AMBER topology files for compatibility
 - Handles force field parameters and bond types correctly
-- Enables use of AMBER analysis tools with EasyMD simulations
+- Enables use of AMBER analysis tools with UnoMD simulations
 
 ## Requirements
 
@@ -298,14 +298,14 @@ We welcome contributions! Please feel free to submit a Pull Request.
 
 ## Citation
 
-If you use EasyMD in your research, please cite it as:
+If you use UnoMD in your research, please cite it as:
 
 ```bibtex
-@software{easymd2025,
+@software{unomd2025,
   author       = {Ingrid Barbosa-Farias and Omar Arias Gaguancela},
-  title        = {EasyMD: A Python Package for Simplified Molecular Dynamics Simulations},
+  title        = {UnoMD: A Python Package for Simplified Molecular Dynamics Simulations},
   year         = {2025},
   publisher    = {GitHub},
-  url          = {https://github.com/ingcoder/easy-md}
+  url          = {https://github.com/ingcoder/uno-md}
 }
 ```

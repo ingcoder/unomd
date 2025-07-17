@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "easy-md"
+name = "unomd"
 version = "0.1.0"
 description = "A package for molecular dynamics simulations"
 readme = "README.md"
@@ -28,7 +28,8 @@ dependencies = [
     "tqdm>=4.64.1",
     "pyyaml>=6.0",
     "h5py>=3.7.0",
-    "plotly>=5.18.0"
+    "plotly>=5.18.0",
+    "py3dmol>=0.1.0"
 ]
 
 [project.optional-dependencies]
@@ -52,10 +53,10 @@ test = [
 Repository = ""  # Add your repository URL here
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/easy_md"]
+packages = ["src/unomd"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
-addopts = "-v --cov=easy_md --cov-report=term-missing"
+addopts = "-v --cov=unomd --cov-report=term-missing"
 timeout = 300 

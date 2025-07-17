@@ -84,5 +84,5 @@ def quickrun(protein_file, ligand_file=None, nsteps=1000, **kwargs):
 
 
 if __name__ == "__main__":
-    quickrun(protein_file="/Users/ingrid/Projects/EASYMD/example/4w52_C_EPE.pdb", ligand_file="/Users/ingrid/Projects/UnoMD/uno-md/example/4w52_C_EPE.sdf", nsteps=1000)
+    quickrun(protein_file="/Users/ingrid/Projects/UnoMD/uno-md/example/4w52_C_EPE.pdb", ligand_file="/Users/ingrid/Projects/UnoMD/uno-md/example/4w52_C_EPE.sdf", nsteps=1000)
 

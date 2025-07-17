@@ -34,10 +34,8 @@ DEFAULT_CONFIG = {
     "path_amber_complex": "",  # Will be set in create_config
     "path_mmpbsa_in": "",  # Will be set in create_config
     "path_mmpbsa_results": "",  # Will be set in create_config
+    "path_molviewer_html": "",  # Will be set in create_config
    
-
-
-    
     # Forcefields
     "ff_small_molecule_openff": "openff-2.0.0.offxml",
     "ff_protein_openff": "ff14sb_off_impropers_0.0.3.offxml",
@@ -95,7 +93,7 @@ DEFAULT_CONFIG = {
     "mmpbsa": False,
 
     # Amber Files
-    "export_prmtop": True,
+    "export_prmtop": False,
 }
 
 def create_config(
@@ -269,7 +267,8 @@ def create_config(
         "path_amber_complex": str(amber_dir / "amber_complex.prmtop"),
         "path_mmpbsa_in": str(mmpbsa_dir / "mmpbsa.in"),
         "path_mmpbsa_results": str(mmpbsa_dir / "FINAL_RESULTS_MMPBSA.dat"),
-        "path_rmsd_rmsf_html": str(analysis_dir / "rmsd_rmsf_analysis.html")
+        "path_rmsd_rmsf_html": str(analysis_dir / "rmsd_rmsf_analysis.html"),
+        "path_molviewer_html": str(analysis_dir / "molecule_viewer.html")
     })
 
     # Save configuration

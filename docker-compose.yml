@@ -1,9 +1,9 @@
 version: "3.8"
 
 services:
-  easy-md:
+  uno-md:
     build: .
-    container_name: easy-md
+    container_name: uno-md
     volumes:
       # Mount input files
       - ./example:/app/inputs:ro
@@ -17,9 +17,9 @@ services:
     command: ["tail", "-f", "/dev/null"]
 
   # Configuration for GPU usage (requires nvidia-docker)
-  easy-md-gpu:
+  uno-md-gpu:
     build: .
-    container_name: easy-md-gpu
+    container_name: uno-md-gpu
     runtime: nvidia
     environment:
       - NVIDIA_VISIBLE_DEVICES=all
@@ -31,9 +31,9 @@ services:
     command: ["tail", "-f", "/dev/null"]
 
   # Jupyter notebook service for interactive development
-  easy-md-jupyter:
+  uno-md-jupyter:
     build: .
-    container_name: easy-md-jupyter
+    container_name: uno-md-jupyter
     ports:
       - "8888:8888"
     volumes:
@@ -44,7 +44,7 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
     command: >
-      bash -c "conda run -n easymd jupyter notebook 
+      bash -c "conda run -n unomd jupyter notebook 
       --ip=0.0.0.0 
       --port=8888 
       --no-browser 

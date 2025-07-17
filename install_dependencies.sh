@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# EasyMD Dependency Installation Script
+# UnoMD Dependency Installation Script
 # This script installs ambertools and openff-toolkit in the Docker container
 
 set -e
@@ -26,7 +26,7 @@ print_error() {
 # Check if running inside Docker container
 if [ ! -f /.dockerenv ]; then
     print_error "This script should be run inside the Docker container"
-    print_info "Run: docker-compose exec easy-md bash"
+    print_info "Run: docker-compose exec uno-md bash"
     print_info "Then: ./install_dependencies.sh"
     exit 1
 fi
@@ -34,7 +34,7 @@ fi
 # Activate conda environment
 print_info "Activating conda environment..."
 eval "$(conda shell.bash hook)"
-conda activate easymd
+conda activate unomd
 
 # Function to try installing from different channels
 install_ambertools() {

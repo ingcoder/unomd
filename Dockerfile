@@ -32,10 +32,10 @@ COPY README.md LICENSE ./
 RUN mamba env create -f environment.yaml && mamba clean -afy
 
 # Make RUN commands use the new environment
-SHELL ["conda", "run", "-n", "easymd", "/bin/bash", "-c"]
+SHELL ["conda", "run", "-n", "unomd", "/bin/bash", "-c"]
 
 # Install ambertools and openff-toolkit
-RUN mamba install -c conda-forge -c omnia ambertools openff-toolkit -y
+# RUN mamba install -c conda-forge -c omnia ambertools openff-toolkit -y
 
 # Install the package in development mode
 RUN pip install -e .

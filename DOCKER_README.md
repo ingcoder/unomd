@@ -1,6 +1,6 @@
-# EasyMD Docker Setup
+# UnoMD Docker Setup
 
-This guide explains how to run EasyMD using Docker containers for easy deployment and reproducible molecular dynamics simulations.
+This guide explains how to run UnoMD using Docker containers for easy deployment and reproducible molecular dynamics simulations.
 
 ## Prerequisites
 
@@ -18,10 +18,10 @@ Due to conda channel availability issues, the Docker image is built with core de
 
 ```bash
 # Build the image
-docker-compose build easy-md
+docker-compose build uno-md
 
 # Or build manually
-docker build -t easy-md .
+docker build -t uno-md .
 ```
 
 ### 2. Install Missing Dependencies
@@ -30,11 +30,11 @@ The base image doesn't include `ambertools` and `openff-toolkit`. Install them m
 
 ```bash
 # Start container
-docker-compose up -d easy-md
+docker-compose up -d uno-md
 
 # Install missing dependencies
-docker-compose exec easy-md bash -c "
-  conda activate easymd &&
+docker-compose exec uno-md bash -c "
+  conda activate unomd &&
   conda install -c conda-forge -c omnia ambertools &&
   conda install -c conda-forge openff-toolkit
 "
@@ -44,17 +44,17 @@ docker-compose exec easy-md bash -c "
 
 ```bash
 # Run a simulation with the example files
-docker-compose exec easy-md easy-md /app/inputs/4W52.pdb --ligand_file /app/inputs/4w52_C_EPE.sdf --nsteps 1000
+docker-compose exec uno-md uno-md /app/inputs/4W52.pdb --ligand_file /app/inputs/4w52_C_EPE.sdf --nsteps 1000
 ```
 
 ### 4. Check Results
 
 ```bash
 # Check output files
-docker-compose exec easy-md ls -la /app/outputs
+docker-compose exec uno-md ls -la /app/outputs
 
 # View logs
-docker-compose exec easy-md ls -la /app/logs
+docker-compose exec uno-md ls -la /app/logs
 ```
 
 ## Manual Dependency Installation
@@ -63,10 +63,10 @@ docker-compose exec easy-md ls -la /app/logs
 
 ```bash
 # Start interactive session
-docker-compose exec easy-md bash
+docker-compose exec uno-md bash
 
 # Activate environment
-conda activate easymd
+conda activate unomd
 
 # Try installing from conda-forge
 conda install -c conda-forge ambertools openff-toolkit
@@ -88,7 +88,7 @@ If conda installation fails, you can install from source:
 
 ```bash
 # Inside the container
-conda activate easymd
+conda activate unomd
 
 # Install AmberTools from source (requires more setup)
 # See: https://ambermd.org/GetAmber.php
@@ -105,43 +105,43 @@ pip install openff-toolkit
 
 ```bash
 # Start container
-docker-compose up -d easy-md
+docker-compose up -d uno-md
 
 # Install dependencies (first time only)
-docker-compose exec easy-md bash -c "
-  conda activate easymd &&
+docker-compose exec uno-md bash -c "
+  conda activate unomd &&
   conda install -c conda-forge -c omnia ambertools openff-toolkit
 "
 
 # Run simulation
-docker-compose exec easy-md easy-md /app/inputs/4W52.pdb --ligand_file /app/inputs/4w52_C_EPE.sdf --nsteps 5000 --platform CPU
+docker-compose exec uno-md uno-md /app/inputs/4W52.pdb --ligand_file /app/inputs/4w52_C_EPE.sdf --nsteps 5000 --platform CPU
 ```
 
 #### GPU simulation (requires NVIDIA Docker):
 
 ```bash
 # Start GPU container
-docker-compose up -d easy-md-gpu
+docker-compose up -d uno-md-gpu
 
 # Install dependencies (first time only)
-docker-compose exec easy-md-gpu bash -c "
-  conda activate easymd &&
+docker-compose exec uno-md-gpu bash -c "
+  conda activate unomd &&
   conda install -c conda-forge -c omnia ambertools openff-toolkit
 "
 
 # Run simulation with CUDA
-docker-compose exec easy-md-gpu easy-md /app/inputs/4W52.pdb --ligand_file /app/inputs/4w52_C_EPE.sdf --nsteps 5000 --platform CUDA
+docker-compose exec uno-md-gpu uno-md /app/inputs/4W52.pdb --ligand_file /app/inputs/4w52_C_EPE.sdf --nsteps 5000 --platform CUDA
 ```
 
 #### Jupyter Notebook interface:
 
 ```bash
 # Start Jupyter service
-docker-compose up -d easy-md-jupyter
+docker-compose up -d uno-md-jupyter
 
 # Install dependencies (first time only)
-docker-compose exec easy-md-jupyter bash -c "
-  conda activate easymd &&
+docker-compose exec uno-md-jupyter bash -c "
+  conda activate unomd &&
   conda install -c conda-forge -c omnia ambertools openff-toolkit
 "
 
@@ -152,13 +152,13 @@ docker-compose exec easy-md-jupyter bash -c "
 
 ```bash
 # Build image
-docker build -t easy-md .
+docker build -t uno-md .
 
 # Run with volume mounts
-docker run -v $(pwd)/example:/app/inputs:ro -v $(pwd)/outputs:/app/outputs -v $(pwd)/logs:/app/logs easy-md bash -c "
-  conda activate easymd &&
+docker run -v $(pwd)/example:/app/inputs:ro -v $(pwd)/outputs:/app/outputs -v $(pwd)/logs:/app/logs uno-md bash -c "
+  conda activate unomd &&
   conda install -c conda-forge -c omnia ambertools openff-toolkit -y &&
-  easy-md /app/inputs/4W52.pdb --ligand_file /app/inputs/4w52_C_EPE.sdf --nsteps 1000
+  uno-md /app/inputs/4W52.pdb --ligand_file /app/inputs/4w52_C_EPE.sdf --nsteps 1000
 "
 ```
 
@@ -168,31 +168,31 @@ If you want to create a custom image with all dependencies pre-installed:
 
 ```bash
 # Start a container
-docker run -it --name easy-md-setup easy-md bash
+docker run -it --name uno-md-setup uno-md bash
 
 # Inside the container, install dependencies
-conda activate easymd
+conda activate unomd
 conda install -c conda-forge -c omnia ambertools openff-toolkit -y
 
 # Exit container
 exit
 
 # Commit the changes to a new image
-docker commit easy-md-setup easy-md-complete
+docker commit uno-md-setup uno-md-complete
 
 # Clean up
-docker rm easy-md-setup
+docker rm uno-md-setup
 
 # Now you can use the complete image
-docker run --rm easy-md-complete easy-md --help
+docker run --rm uno-md-complete uno-md --help
 ```
 
 ## Command Line Options
 
-The containerized `easy-md` command supports these options:
+The containerized `uno-md` command supports these options:
 
 ```bash
-easy-md <protein_file> [options]
+uno-md <protein_file> [options]
 
 Required:
   protein_file          Path to protein PDB file
@@ -224,16 +224,16 @@ The Docker container is organized as follows:
 
 ```bash
 # 1. Start container
-docker-compose up -d easy-md
+docker-compose up -d uno-md
 
 # 2. Install dependencies (first time only)
-docker-compose exec easy-md bash -c "
-  conda activate easymd &&
+docker-compose exec uno-md bash -c "
+  conda activate unomd &&
   conda install -c conda-forge -c omnia ambertools openff-toolkit -y
 "
 
 # 3. Run simulation
-docker-compose exec easy-md easy-md \
+docker-compose exec uno-md uno-md \
   /app/inputs/4W52.pdb \
   --ligand_file /app/inputs/4w52_C_EPE.sdf \
   --nsteps 10000 \
@@ -241,7 +241,7 @@ docker-compose exec easy-md easy-md \
   --platform CPU
 
 # 4. Check results
-docker-compose exec easy-md ls -la /app/outputs
+docker-compose exec uno-md ls -la /app/outputs
 ```
 
 ### Using Custom Input Files
@@ -252,7 +252,7 @@ cp your_protein.pdb ./example/
 cp your_ligand.sdf ./example/
 
 # 2. Run simulation
-docker-compose exec easy-md easy-md \
+docker-compose exec uno-md uno-md \
   /app/inputs/your_protein.pdb \
   --ligand_file /app/inputs/your_ligand.sdf \
   --nsteps 50000
@@ -265,8 +265,8 @@ docker-compose exec easy-md easy-md \
 1. **Missing dependencies error**: Make sure to install `ambertools` and `openff-toolkit` manually
 
    ```bash
-   docker-compose exec easy-md bash -c "
-     conda activate easymd &&
+   docker-compose exec uno-md bash -c "
+     conda activate unomd &&
      conda install -c conda-forge -c omnia ambertools openff-toolkit -y
    "
    ```
@@ -298,17 +298,17 @@ docker-compose exec easy-md easy-md \
 
 ```bash
 # Check container logs
-docker-compose logs easy-md
+docker-compose logs uno-md
 
 # Interactive debugging session
-docker-compose exec easy-md bash
+docker-compose exec uno-md bash
 
 # Check conda environment
-docker-compose exec easy-md conda info --envs
-docker-compose exec easy-md conda list -n easymd
+docker-compose exec uno-md conda info --envs
+docker-compose exec uno-md conda list -n unomd
 
 # Test import
-docker-compose exec easy-md python -c "
+docker-compose exec uno-md python -c "
   from easy_md.main.quickrun import quickrun
   print('✅ EasyMD imports successfully')
 "
@@ -347,7 +347,7 @@ docker-compose down
 docker-compose down -v
 
 # Remove images
-docker rmi easy-md
+docker rmi uno-md
 ```
 
 This Docker setup provides a solid foundation for running EasyMD molecular dynamics simulations with manual dependency installation as needed.
