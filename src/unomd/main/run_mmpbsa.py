@@ -57,7 +57,7 @@ def get_last_final_dcd(config):
     
 def clean_mmpbsa_files():
     """Cleaning the mmpbsa files."""
-    script_dir = Path(__file__).resolve().parent
+    script_dir = Path(__file__).resolve().parents[3]
     for file in script_dir.glob("_MMPBSA*"):
         try:
             file.unlink()

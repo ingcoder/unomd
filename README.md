@@ -57,7 +57,7 @@ bash Mambaforge-$(uname)-$(uname -m).sh
 
 ```bash
 git clone https://github.com/ingcoder/unomd.git
-cd uno-md
+cd unomd
 mamba env create -f environment.yaml
 mamba activate unomd
 pip install -e .

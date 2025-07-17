@@ -78,11 +78,11 @@ def quickrun(protein_file, ligand_file=None, nsteps=1000, **kwargs):
     if config["mmpbsa"]:
         amber_files.export_prmtop(config)
         run_mmpbsa.main(config)
-
-    if config["export_prmtop"]:
+    elif config["export_prmtop"]:
         amber_files.export_prmtop(config)
 
+def main():
+    pass
 
 if __name__ == "__main__":
-    quickrun(protein_file="/Users/ingrid/Projects/UnoMD/uno-md/example/4w52_C_EPE.pdb", ligand_file="/Users/ingrid/Projects/UnoMD/uno-md/example/4w52_C_EPE.sdf", nsteps=1000)
-
+    main()
