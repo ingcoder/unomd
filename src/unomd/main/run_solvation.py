@@ -47,19 +47,19 @@ def add_water(config):
 
     logger.info("Loading PDB file & adding missing hydrogens...")
     fixer = PDBFixer(filename=config.get("path_protein"))
-    fixer.findMissingResidues()
-    fixer.findMissingAtoms()
-    n_missing_heavy = sum(len(v) for v in fixer.missingAtoms.values())
+    # fixer.findMissingResidues()
+    # fixer.findMissingAtoms()
+    # n_missing_heavy = sum(len(v) for v in fixer.missingAtoms.values())
 
-    if n_missing_heavy > 0:
-        logger.info(f"Found {n_missing_heavy} missing heavy atoms - adding them now...")
-        fixer.addMissingAtoms()
-        logger.info("Adding missing hydrogens...")
-        fixer.addMissingHydrogens(pH=config.get("solv_pH"))
-    else:
-        logger.info("No missing heavy atoms found")
-        logger.info("Adding missing hydrogens...")
-        fixer.addMissingHydrogens(pH=config.get("solv_pH"))
+    # if n_missing_heavy > 0:
+    #     logger.info(f"Found {n_missing_heavy} missing heavy atoms - adding them now...")
+    #     fixer.addMissingAtoms()
+    #     logger.info("Adding missing hydrogens...")
+    #     fixer.addMissingHydrogens(pH=config.get("solv_pH"))
+    # else:
+    #     logger.info("No missing heavy atoms found")
+    #     logger.info("Adding missing hydrogens...")
+    #     fixer.addMissingHydrogens(pH=config.get("solv_pH"))
 
     # Create Modeller instance from fixed structure
     modeller = Modeller(fixer.topology, fixer.positions)
