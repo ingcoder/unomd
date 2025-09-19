@@ -26,7 +26,7 @@ import numpy as np
 
 # Third-party imports
 from openmm.app import PDBFile, Modeller, ForceField
-from openmm import Vec3
+from openmm import Vec3, unit as u
 from openmm.unit import nanometer as nm, molar
 from pdbfixer import PDBFixer
 
@@ -35,9 +35,85 @@ from unomd.utils.fileparser import time_tracker
 from unomd.utils import info_logger
 import logging
 
+import numpy as np
+
 
 logger = logging.getLogger(__name__)
 
+
+def build_prism_box(config):
+    """
+    Build a hexagonal-prism box around the protein.
+    """
+
+    logger.info("========================================================")
+    logger.info("💧 Solvation")
+    logger.info("========================================================")
+
+    logger.info("Loading PDB file & adding missing hydrogens...")
+    receptor_path = "/Users/ingrid/Projects/EasyMD/unomd/tests/TnC-TnI_AlphaFold_2025-06-01_22-05_model1_TRIMED_final.pdb"
+    pad = float(config.get("solv_box_buffer", 1.2))  # nm
+    water_model = config.get("water_model", "tip3p")
+    ionic_strength = float(config.get("ionic_strength_molar", 0.0)) * u.molar
+    posIon = config.get("positiveIon", "Na+")
+    negIon = config.get("negativeIon", "Cl-")
+    fixer = PDBFixer(filename=config.get("path_protein"))
+
+    # Create Modeller instance from fixed structure
+    modeller = Modeller(fixer.topology, fixer.positions)
+
+    # Extract positions and convert to numpy array
+    pos_nm = np.array([[p.x, p.y, p.z] for p in modeller.positions.value_in_unit(u.nanometer)],
+                      dtype=np.float64)
+
+
+    # 2) PCA align: center -> rotate so shortest principal axis is Z
+    center = pos_nm.mean(axis=0)
+    X = pos_nm - center
+    # covariance & eigendecomposition
+    evals, evecs = np.linalg.eigh(np.cov(X.T))
+    # sort by ascending variance (shortest axis first)
+    R = evecs[:, np.argsort(evals)]  # columns = principal axes
+    Xr = X @ R  # rotated coords, short axis ~ Z
+
+    # 3) Compute tight hexagonal-prism box
+    # XY cross-section: use max radial extent + padding
+    r_max = np.sqrt((Xr[:, 0]**2 + Xr[:, 1]**2)).max()
+    L_xy = 2.0 * (r_max + pad)  # nm
+
+    # Z: length + 2*pad
+    z_min, z_max = Xr[:, 2].min(), Xr[:, 2].max()
+    L_z = (z_max - z_min) + 2.0 * pad  # nm
+
+    # 4) Recenter solute in box
+    Xr[:, 0] -= (Xr[:, 0].min() + Xr[:, 0].max()) / 2.0
+    Xr[:, 1] -= (Xr[:, 1].min() + Xr[:, 1].max()) / 2.0
+    Xr[:, 2] -= (Xr[:, 2].min() + Xr[:, 2].max()) / 2.0
+
+    modeller.positions = [Vec3(*xyz) for xyz in Xr] * u.nanometer
+
+    # 5) Set hexagonal prism periodic box (γ = 60° in XY)
+    a = Vec3(L_xy, 0.0, 0.0) * u.nanometer
+    b = Vec3(0.5 * L_xy, (np.sqrt(3) / 2.0) * L_xy, 0.0) * u.nanometer
+    c = Vec3(0.0, 0.0, L_z) * u.nanometer
+    # modeller.topology.setPeriodicBoxVectors((a, b, c))
+
+    # 6) Add solvent (no cubic box enforced)
+    ff = ForceField(config.get("ff_protein"), config.get("ff_water"))
+    modeller.addSolvent(
+        ff,
+        model=water_model,
+        ionicStrength=ionic_strength,
+        positiveIon=posIon,
+        negativeIon=negIon,
+        boxVectors=(a, b, c),
+    )
+
+    with open(config.get("path_protein_solvated"), "w") as file:
+        PDBFile.writeFile(modeller.topology, modeller.positions, file)
+    logger.info(
+        f"✅ Saved solvated structure to: {config.get('path_protein_solvated')}"
+    )
 
 @time_tracker
 def add_water(config):
@@ -115,4 +191,5 @@ def add_water(config):
 
 
 if __name__ == "__main__":
-    add_water()
+    # add_water()
+    build_prism_box()

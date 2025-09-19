@@ -48,7 +48,7 @@ DEFAULT_CONFIG = {
     "integrator_timestep": 0.002,
 
     # Solvation
-    "solv_box_buffer": 2.5, # angstroms
+    "solv_box_buffer": 1.2, # nm
     "solv_ionic_strength": 0.15, # molar
     "solv_positive_ion": "Na+", # the type of positive ion to add. Allowed values are 'Cs+', 'K+', 'Li+', 'Na+', and 'Rb+'
     "solv_negative_ion": "Cl-", # the type of negative ion to add. Allowed values are 'Cl-', 'Br-', 'F-', and 'I-'. Be aware that not all force fields support all ion types.
