@@ -580,7 +580,7 @@ def save_molecule_viewer_html(config):
 </html>
 """
 
-        with open(config.get("path_molviewer_html"), "w") as f:
+        with open(config.get("path_molviewer_html"), "w", encoding='utf-8') as f:
             f.write(custom_html)
 
         logger.info(f"Location: {config.get('path_molviewer_html')}")
@@ -632,7 +632,7 @@ def save_rmsd_rmsf_html(config):
         
         # Save summary table
         summary_path = html_plot_path.replace('.html', '_summary.html')
-        with open(summary_path, 'w') as f:
+        with open(summary_path, 'w', encoding='utf-8') as f:
             f.write(summary_html)
         logger.info(f"Analysis summary table saved to: {summary_path}")
         
